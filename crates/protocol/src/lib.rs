@@ -152,6 +152,11 @@ pub struct SiteInfo {
     /// process's working directory: builtin plugins run inside the host.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub root: Option<String>,
+    /// Every file under the source directory (documents and static assets
+    /// alike), relative to it with `/` separators, sorted. Lets transformers
+    /// check links to files that are not documents, such as images.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub files: Vec<String>,
 }
 
 /// Parameters of [`request::Initialize`].

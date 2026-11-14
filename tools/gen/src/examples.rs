@@ -205,6 +205,7 @@ impl Messages {
                     title: Some("My Docs".into()),
                     base_url: Some("/docs/".into()),
                     root: Some("/home/me/my-docs".into()),
+                    files: vec!["guide.md".into(), "img/logo.svg".into(), "index.md".into()],
                 },
                 options: json!({"depth": 3}),
             },

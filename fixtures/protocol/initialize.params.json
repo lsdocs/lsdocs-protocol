@@ -7,7 +7,12 @@
   "site": {
     "title": "My Docs",
     "base_url": "/docs/",
-    "root": "/home/me/my-docs"
+    "root": "/home/me/my-docs",
+    "files": [
+      "guide.md",
+      "img/logo.svg",
+      "index.md"
+    ]
   },
   "options": {
     "depth": 3

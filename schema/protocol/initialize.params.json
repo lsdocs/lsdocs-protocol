@@ -58,6 +58,13 @@
             "null"
           ]
         },
+        "files": {
+          "description": "Every file under the source directory (documents and static assets\nalike), relative to it with `/` separators, sorted. Lets transformers\ncheck links to files that are not documents, such as images.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "root": {
           "description": "Absolute path of the site's directory (where `lsdocs.toml` is).\nResolve relative paths from plugin options against this, not the\nprocess's working directory: builtin plugins run inside the host.",
           "type": [
