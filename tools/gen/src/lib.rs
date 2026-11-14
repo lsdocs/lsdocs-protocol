@@ -133,8 +133,8 @@ fn walk(dir: &Path) -> io::Result<Vec<PathBuf>> {
     Ok(files)
 }
 
-/// File stem for a method name: `transform/collect` → `transform.collect`,
-/// `$/cancel` → `cancel`.
+/// File stem for a method name: `transform/collect` -> `transform.collect`,
+/// `$/cancel` -> `cancel`.
 fn stem(method: &str) -> String {
     method.trim_start_matches("$/").replace('/', ".")
 }

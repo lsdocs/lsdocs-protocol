@@ -8,14 +8,14 @@
 //!
 //! ## Lifecycle
 //!
-//! 1. Host → plugin: [`request::Initialize`]; the plugin answers with its
+//! 1. Host -> plugin: [`request::Initialize`]; the plugin answers with its
 //!    [`Capabilities`].
-//! 2. Host → plugin: [`notification::Initialized`].
+//! 2. Host -> plugin: [`notification::Initialized`].
 //! 3. Phase requests, as the plugin's capabilities allow:
 //!    [`request::Parse`], [`request::TransformCollect`],
 //!    [`request::TransformApply`], [`request::Render`], then once
 //!    [`request::RenderSite`].
-//! 4. Host → plugin: [`request::Shutdown`], then [`notification::Exit`].
+//! 4. Host -> plugin: [`request::Shutdown`], then [`notification::Exit`].
 //!
 //! Plugins may send [`notification::Log`], [`notification::Progress`] and
 //! [`notification::Diagnostics`] at any time after initialization.
@@ -73,22 +73,22 @@ pub mod request {
     }
 
     requests! {
-        /// Host → plugin. Starts the session and exchanges capabilities.
+        /// Host -> plugin. Starts the session and exchanges capabilities.
         Initialize = "initialize", InitializeParams => InitializeResult;
-        /// Host → plugin. Asks the plugin to finish outstanding work; it
+        /// Host -> plugin. Asks the plugin to finish outstanding work; it
         /// should then expect [`notification::Exit`](super::notification::Exit).
         Shutdown = "shutdown", () => ();
-        /// Host → plugin. Parses one source file into a document.
+        /// Host -> plugin. Parses one source file into a document.
         Parse = "parse", ParseParams => ParseResult;
-        /// Host → plugin. First transform pass: gathers data from one
+        /// Host -> plugin. First transform pass: gathers data from one
         /// document, e.g. its headings for a site-wide index.
         TransformCollect = "transform/collect", TransformCollectParams => TransformCollectResult;
-        /// Host → plugin. Second transform pass: rewrites one document, with
+        /// Host -> plugin. Second transform pass: rewrites one document, with
         /// the data collected from all documents.
         TransformApply = "transform/apply", TransformApplyParams => TransformApplyResult;
-        /// Host → plugin. Renders one document to an output format.
+        /// Host -> plugin. Renders one document to an output format.
         Render = "render", RenderParams => RenderResult;
-        /// Host → plugin. Sent once after every document is rendered, if
+        /// Host -> plugin. Sent once after every document is rendered, if
         /// the renderer asked for it ([`RenderCapability::site`]): returns
         /// site-wide files such as a sitemap.
         RenderSite = "render/site", RenderSiteParams => RenderSiteResult;
@@ -112,18 +112,18 @@ pub mod notification {
     }
 
     notifications! {
-        /// Host → plugin. Sent after the initialize response; phase requests
+        /// Host -> plugin. Sent after the initialize response; phase requests
         /// may follow.
         Initialized = "initialized", ();
-        /// Host → plugin. The plugin should exit now.
+        /// Host -> plugin. The plugin should exit now.
         Exit = "exit", ();
         /// Either direction. Cancels an in-flight request.
         Cancel = "$/cancel", CancelParams;
-        /// Plugin → host. A log line.
+        /// Plugin -> host. A log line.
         Log = "log", LogParams;
-        /// Plugin → host. Progress on long-running work.
+        /// Plugin -> host. Progress on long-running work.
         Progress = "progress", ProgressParams;
-        /// Plugin → host. Diagnostics not tied to a particular response.
+        /// Plugin -> host. Diagnostics not tied to a particular response.
         Diagnostics = "diagnostics", DiagnosticsParams;
     }
 }
@@ -479,7 +479,7 @@ pub enum LogLevel {
 pub struct ProgressParams {
     /// What is being worked on.
     pub message: String,
-    /// Percent complete, 0–100, if known.
+    /// Percent complete, 0-100, if known.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub percentage: Option<u8>,
 }

@@ -99,17 +99,17 @@ work finished first; the canceller ignores it.
 
 ## Lifecycle
 
-1. Host → plugin request `initialize`. The plugin answers with its protocol
+1. Host -> plugin request `initialize`. The plugin answers with its protocol
    version, name and capabilities. The host ends the connection if the
    protocol versions differ.
-2. Host → plugin notification `initialized`.
+2. Host -> plugin notification `initialized`.
 3. Phase requests the plugin's capabilities allow: `parse`,
    `transform/collect`, `transform/apply`, `render`, and, once after every
    document is rendered, `render/site` (if the render capability has
    `site: true`), whose result lists extra files such as a sitemap. The
    plugin may send `log`, `progress` and `diagnostics` notifications at any
    time.
-4. Host → plugin request `shutdown`, then notification `exit`. The plugin
+4. Host -> plugin request `shutdown`, then notification `exit`. The plugin
    exits; closing the stream also ends the session.
 
 ## Example
