@@ -147,6 +147,11 @@ pub struct SiteInfo {
     /// URL or path prefix the site is served from.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub base_url: Option<String>,
+    /// Absolute path of the site's directory (where `lsdocs.toml` is).
+    /// Resolve relative paths from plugin options against this, not the
+    /// process's working directory: builtin plugins run inside the host.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub root: Option<String>,
 }
 
 /// Parameters of [`request::Initialize`].

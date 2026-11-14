@@ -213,10 +213,10 @@ impl Config {
         let mut seen = BTreeSet::new();
         let mut plugins = Vec::with_capacity(file.plugins.len());
 
-        if let Some(url) = &file.site.base_url {
-            if url.trim().is_empty() {
-                problems.push(Problem::new("site.base_url", "must not be empty"));
-            }
+        if let Some(url) = &file.site.base_url
+            && url.trim().is_empty()
+        {
+            problems.push(Problem::new("site.base_url", "must not be empty"));
         }
 
         for (i, entry) in file.plugins.into_iter().enumerate() {

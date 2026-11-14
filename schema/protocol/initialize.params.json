@@ -58,6 +58,13 @@
             "null"
           ]
         },
+        "root": {
+          "description": "Absolute path of the site's directory (where `lsdocs.toml` is).\nResolve relative paths from plugin options against this, not the\nprocess's working directory: builtin plugins run inside the host.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "title": {
           "description": "Site title.",
           "type": [

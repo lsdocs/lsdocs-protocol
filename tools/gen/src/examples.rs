@@ -204,6 +204,7 @@ impl Messages {
                 site: SiteInfo {
                     title: Some("My Docs".into()),
                     base_url: Some("/docs/".into()),
+                    root: Some("/home/me/my-docs".into()),
                 },
                 options: json!({"depth": 3}),
             },

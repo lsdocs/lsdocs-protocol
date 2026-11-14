@@ -6,7 +6,8 @@
   },
   "site": {
     "title": "My Docs",
-    "base_url": "/docs/"
+    "base_url": "/docs/",
+    "root": "/home/me/my-docs"
   },
   "options": {
     "depth": 3
