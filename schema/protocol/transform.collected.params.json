@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TransformCollectedParams",
+  "description": "Parameters of [`request::TransformCollected`].",
+  "type": "object",
+  "properties": {
+    "collected": {
+      "description": "What this plugin collected from every document: a map from each\ndocument's `source` to its collected `data`.",
+      "default": null
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "collected": {
+    "guide/getting-started.md": {
+      "headings": [
+        {
+          "id": "getting-started",
+          "level": 1
+        }
+      ]
+    },
+    "index.md": {
+      "headings": []
+    }
+  }
+}

@@ -15,7 +15,7 @@ use lsdocs_protocol::{
     LogLevel, LogParams, OutputFile, PROTOCOL_VERSION, ParseCapability, ParseParams, ParseResult,
     ProgramInfo, ProgressParams, RenderCapability, RenderParams, RenderResult, RenderSiteParams,
     RenderSiteResult, RenderedPage, Severity, SiteInfo, TransformApplyParams, TransformApplyResult,
-    TransformCapability, TransformCollectParams, TransformCollectResult,
+    TransformCapability, TransformCollectParams, TransformCollectResult, TransformCollectedParams,
 };
 use serde_json::json;
 
@@ -255,6 +255,7 @@ pub struct Messages {
     pub parse_result: ParseResult,
     pub collect_params: TransformCollectParams,
     pub collect_result: TransformCollectResult,
+    pub collected_params: TransformCollectedParams,
     pub apply_params: TransformApplyParams,
     pub apply_result: TransformApplyResult,
     pub render_params: RenderParams,
@@ -327,6 +328,12 @@ impl Messages {
             collect_result: TransformCollectResult {
                 data: json!({"headings": [{"id": "getting-started", "level": 1}]}),
                 diagnostics: vec![],
+            },
+            collected_params: TransformCollectedParams {
+                collected: json!({
+                    "guide/getting-started.md": {"headings": [{"id": "getting-started", "level": 1}]},
+                    "index.md": {"headings": []},
+                }),
             },
             apply_params: TransformApplyParams {
                 document: doc.clone(),

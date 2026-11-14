@@ -5,7 +5,7 @@
   "type": "object",
   "properties": {
     "collected": {
-      "description": "What this plugin collected from every document: a map from each\ndocument's `source` to its collected `data`. Null if the plugin does\nnot collect.",
+      "description": "What this plugin collected from every document: a map from each\ndocument's `source` to its collected `data`. Null if the plugin does\nnot collect. Over the wire the host leaves it null and sends it once\nbeforehand with [`request::TransformCollected`]; the plugin SDK fills\nit back in, so handlers always see it here.",
       "default": null
     },
     "document": {

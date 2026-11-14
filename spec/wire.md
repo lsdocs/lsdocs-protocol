@@ -137,7 +137,9 @@ work finished first; the canceller ignores it.
    protocol versions differ.
 2. Host -> plugin notification `initialized`.
 3. Phase requests the plugin's capabilities allow: `parse`,
-   `transform/collect`, `transform/apply`, `render`, and, once after every
+   `transform/collect`, then once `transform/collected` (everything the
+   plugin collected; the `transform/apply` requests that follow leave
+   `collected` null), `transform/apply`, `render`, and, once after every
    document is rendered, `render/site` (if the render capability has
    `site: true`), whose result lists extra files such as a sitemap. The
    plugin may send `log`, `progress` and `diagnostics` notifications at any

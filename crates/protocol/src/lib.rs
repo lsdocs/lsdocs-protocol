@@ -12,9 +12,9 @@
 //!    [`Capabilities`].
 //! 2. Host -> plugin: [`notification::Initialized`].
 //! 3. Phase requests, as the plugin's capabilities allow:
-//!    [`request::Parse`], [`request::TransformCollect`],
-//!    [`request::TransformApply`], [`request::Render`], then once
-//!    [`request::RenderSite`].
+//!    [`request::Parse`], [`request::TransformCollect`], then once
+//!    [`request::TransformCollected`], [`request::TransformApply`],
+//!    [`request::Render`], then once [`request::RenderSite`].
 //! 4. Host -> plugin: [`request::Shutdown`], then [`notification::Exit`].
 //!
 //! Plugins may send [`notification::Log`], [`notification::Progress`] and
@@ -83,6 +83,10 @@ pub mod request {
         /// Host -> plugin. First transform pass: gathers data from one
         /// document, e.g. its headings for a site-wide index.
         TransformCollect = "transform/collect", TransformCollectParams => TransformCollectResult;
+        /// Host -> plugin. Sent once between the two transform passes, to a
+        /// plugin that collects: everything collected from all documents.
+        /// The `transform/apply` requests that follow omit it.
+        TransformCollected = "transform/collected", TransformCollectedParams => ();
         /// Host -> plugin. Second transform pass: rewrites one document, with
         /// the data collected from all documents.
         TransformApply = "transform/apply", TransformApplyParams => TransformApplyResult;
@@ -295,6 +299,16 @@ pub struct TransformCollectResult {
     pub diagnostics: Vec<Diagnostic>,
 }
 
+/// Parameters of [`request::TransformCollected`].
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct TransformCollectedParams {
+    /// What this plugin collected from every document: a map from each
+    /// document's `source` to its collected `data`.
+    #[serde(default)]
+    pub collected: Value,
+}
+
 /// Parameters of [`request::TransformApply`].
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -303,7 +317,9 @@ pub struct TransformApplyParams {
     pub document: Document,
     /// What this plugin collected from every document: a map from each
     /// document's `source` to its collected `data`. Null if the plugin does
-    /// not collect.
+    /// not collect. Over the wire the host leaves it null and sends it once
+    /// beforehand with [`request::TransformCollected`]; the plugin SDK fills
+    /// it back in, so handlers always see it here.
     #[serde(default)]
     pub collected: Value,
 }

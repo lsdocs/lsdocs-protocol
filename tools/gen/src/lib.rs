@@ -54,6 +54,7 @@ pub fn outputs() -> Vec<Output> {
     request::<request::Parse>(&mut out, ex.parse_params, ex.parse_result);
     request::<request::TransformCollect>(&mut out, ex.collect_params, ex.collect_result);
     request::<request::TransformApply>(&mut out, ex.apply_params, ex.apply_result);
+    request::<request::TransformCollected>(&mut out, ex.collected_params, ());
     request::<request::Render>(&mut out, ex.render_params, ex.render_result);
     request::<request::RenderSite>(&mut out, ex.render_site_params, ex.render_site_result);
     notification::<notification::Initialized>(&mut out, ());
