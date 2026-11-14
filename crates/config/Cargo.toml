@@ -1,0 +1,12 @@
+[package]
+name = "lsdocs-config"
+description = "Site configuration and plugin manifest types."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]

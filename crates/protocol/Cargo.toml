@@ -1,0 +1,14 @@
+[package]
+name = "lsdocs-protocol"
+description = "Message and capability types for the lsdocs plugin protocol."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+lsdocs-doctree.workspace = true
+lsdocs-config.workspace = true
