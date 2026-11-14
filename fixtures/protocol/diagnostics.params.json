@@ -1,0 +1,18 @@
+{
+  "diagnostics": [
+    {
+      "severity": "warning",
+      "message": "link target `../reference/config.md` not found",
+      "source": "guide/getting-started.md",
+      "span": {
+        "start": 60,
+        "end": 97
+      },
+      "code": "broken-link"
+    },
+    {
+      "severity": "error",
+      "message": "plugin crashed"
+    }
+  ]
+}

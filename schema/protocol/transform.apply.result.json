@@ -1,0 +1,1043 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TransformApplyResult",
+  "description": "Result of [`request::TransformApply`].",
+  "type": "object",
+  "properties": {
+    "diagnostics": {
+      "description": "Problems found.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Diagnostic"
+      }
+    },
+    "document": {
+      "description": "The transformed document.",
+      "$ref": "#/$defs/Document"
+    }
+  },
+  "required": [
+    "document"
+  ],
+  "$defs": {
+    "Align": {
+      "description": "Horizontal alignment of a table column.",
+      "oneOf": [
+        {
+          "description": "No alignment specified.",
+          "type": "string",
+          "const": "none"
+        },
+        {
+          "description": "Left-aligned.",
+          "type": "string",
+          "const": "left"
+        },
+        {
+          "description": "Centered.",
+          "type": "string",
+          "const": "center"
+        },
+        {
+          "description": "Right-aligned.",
+          "type": "string",
+          "const": "right"
+        }
+      ]
+    },
+    "BlockQuote": {
+      "description": "See [`Node::BlockQuote`].",
+      "type": "object",
+      "properties": {
+        "children": {
+          "description": "Quoted content.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Node"
+          }
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "CodeBlock": {
+      "description": "See [`Node::CodeBlock`].",
+      "type": "object",
+      "properties": {
+        "info": {
+          "description": "Anything after the language on a Markdown fence's info line.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "language": {
+          "description": "Language name, e.g. `\"rust\"`, if given.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "value": {
+          "description": "The code itself.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ]
+    },
+    "Custom": {
+      "description": "See [`Node::Custom`].",
+      "type": "object",
+      "properties": {
+        "attrs": {
+          "description": "Arbitrary attributes.",
+          "type": "object",
+          "additionalProperties": true
+        },
+        "children": {
+          "description": "Child nodes, if any.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Node"
+          }
+        },
+        "kind": {
+          "description": "The plugin-defined kind, e.g. `\"mermaid\"`. Selected as\n`\"custom:<kind>\"`.",
+          "type": "string"
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind"
+      ]
+    },
+    "Diagnostic": {
+      "description": "A problem to report to the user, modeled on LSP diagnostics.",
+      "type": "object",
+      "properties": {
+        "code": {
+          "description": "A short identifier for the kind of problem, e.g. `\"broken-link\"`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "message": {
+          "description": "What is wrong.",
+          "type": "string"
+        },
+        "severity": {
+          "description": "How serious the problem is.",
+          "$ref": "#/$defs/Severity"
+        },
+        "source": {
+          "description": "Source file the problem is in, relative to the source directory.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "span": {
+          "description": "Where in `source` the problem is.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "severity",
+        "message"
+      ]
+    },
+    "Document": {
+      "description": "A parsed source document.",
+      "type": "object",
+      "properties": {
+        "children": {
+          "description": "Top-level nodes.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Node"
+          }
+        },
+        "metadata": {
+          "description": "Front matter and other document-level data.",
+          "type": "object",
+          "additionalProperties": true
+        },
+        "source": {
+          "description": "Path of the source file, relative to the site's source directory,\nwith `/` separators.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source"
+      ]
+    },
+    "Emphasis": {
+      "description": "See [`Node::Emphasis`].",
+      "type": "object",
+      "properties": {
+        "children": {
+          "description": "Emphasized content.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Node"
+          }
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "Heading": {
+      "description": "See [`Node::Heading`].",
+      "type": "object",
+      "properties": {
+        "children": {
+          "description": "Inline content.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Node"
+          }
+        },
+        "id": {
+          "description": "Anchor identifier, e.g. for linking to the heading.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "level": {
+          "description": "Heading level, from 1 (top) to 6.",
+          "type": "integer",
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "level"
+      ]
+    },
+    "Image": {
+      "description": "See [`Node::Image`].",
+      "type": "object",
+      "properties": {
+        "alt": {
+          "description": "Alternative text.",
+          "type": "string",
+          "default": ""
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "title": {
+          "description": "Image title (often shown as a tooltip).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "url": {
+          "description": "Image location.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ]
+    },
+    "InlineCode": {
+      "description": "See [`Node::InlineCode`].",
+      "type": "object",
+      "properties": {
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "value": {
+          "description": "The code.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ]
+    },
+    "LineBreak": {
+      "description": "See [`Node::LineBreak`].",
+      "type": "object",
+      "properties": {
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "Link": {
+      "description": "See [`Node::Link`].",
+      "type": "object",
+      "properties": {
+        "children": {
+          "description": "Link text.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Node"
+          }
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "title": {
+          "description": "Link title (often shown as a tooltip).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "url": {
+          "description": "Link target.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ]
+    },
+    "List": {
+      "description": "See [`Node::List`].",
+      "type": "object",
+      "properties": {
+        "children": {
+          "description": "The list's items.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Node"
+          }
+        },
+        "ordered": {
+          "description": "Whether items are numbered.",
+          "type": "boolean",
+          "default": false
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "start": {
+          "description": "Number of the first item of an ordered list, if not 1.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        }
+      }
+    },
+    "ListItem": {
+      "description": "See [`Node::ListItem`].",
+      "type": "object",
+      "properties": {
+        "checked": {
+          "description": "For task list items, whether the box is checked.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "children": {
+          "description": "Content of the item.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Node"
+          }
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "Node": {
+      "description": "A node in the document tree.\n\nSerialized with a `type` tag holding the [`Node::kind`] name, for core\nkinds, followed by the variant's fields.",
+      "oneOf": [
+        {
+          "description": "A titled section; by convention its first child is a [`Heading`].",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "section"
+            }
+          },
+          "$ref": "#/$defs/Section",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "A heading.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "heading"
+            }
+          },
+          "$ref": "#/$defs/Heading",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "A paragraph.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "paragraph"
+            }
+          },
+          "$ref": "#/$defs/Paragraph",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "A bulleted or numbered list whose children are list items.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "list"
+            }
+          },
+          "$ref": "#/$defs/List",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "An item of a [`List`].",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "list_item"
+            }
+          },
+          "$ref": "#/$defs/ListItem",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "A block quote.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "block_quote"
+            }
+          },
+          "$ref": "#/$defs/BlockQuote",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "A block of code or preformatted text.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "code_block"
+            }
+          },
+          "$ref": "#/$defs/CodeBlock",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "A table whose children are table rows.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "table"
+            }
+          },
+          "$ref": "#/$defs/Table",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "A row of a [`Table`] whose children are table cells.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "table_row"
+            }
+          },
+          "$ref": "#/$defs/TableRow",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "A cell of a [`TableRow`].",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "table_cell"
+            }
+          },
+          "$ref": "#/$defs/TableCell",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "A horizontal rule.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "thematic_break"
+            }
+          },
+          "$ref": "#/$defs/ThematicBreak",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "Content passed through verbatim to renderers of a matching format,\nsuch as inline HTML in Markdown.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "raw"
+            }
+          },
+          "$ref": "#/$defs/Raw",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "Plain text.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "text"
+            }
+          },
+          "$ref": "#/$defs/Text",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "Emphasized (usually italic) text.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "emphasis"
+            }
+          },
+          "$ref": "#/$defs/Emphasis",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "Strongly emphasized (usually bold) text.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "strong"
+            }
+          },
+          "$ref": "#/$defs/Strong",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "Inline code.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "inline_code"
+            }
+          },
+          "$ref": "#/$defs/InlineCode",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "A hyperlink.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "link"
+            }
+          },
+          "$ref": "#/$defs/Link",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "An image.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "image"
+            }
+          },
+          "$ref": "#/$defs/Image",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "A hard line break.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "line_break"
+            }
+          },
+          "$ref": "#/$defs/LineBreak",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "A node kind defined by a plugin rather than by lsdocs.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "custom"
+            }
+          },
+          "$ref": "#/$defs/Custom",
+          "required": [
+            "type"
+          ]
+        }
+      ]
+    },
+    "Paragraph": {
+      "description": "See [`Node::Paragraph`].",
+      "type": "object",
+      "properties": {
+        "children": {
+          "description": "Inline content.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Node"
+          }
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "Raw": {
+      "description": "See [`Node::Raw`].",
+      "type": "object",
+      "properties": {
+        "format": {
+          "description": "Output format the content is meant for, e.g. `\"html\"`.",
+          "type": "string"
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "value": {
+          "description": "The verbatim content.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "format",
+        "value"
+      ]
+    },
+    "Section": {
+      "description": "See [`Node::Section`].",
+      "type": "object",
+      "properties": {
+        "children": {
+          "description": "Content of the section.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Node"
+          }
+        },
+        "id": {
+          "description": "Anchor identifier, e.g. for linking to the section.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "Severity": {
+      "description": "Severity of a [`Diagnostic`].",
+      "oneOf": [
+        {
+          "description": "The build fails.",
+          "type": "string",
+          "const": "error"
+        },
+        {
+          "description": "Probably a mistake, but the build continues.",
+          "type": "string",
+          "const": "warning"
+        },
+        {
+          "description": "Worth knowing.",
+          "type": "string",
+          "const": "info"
+        },
+        {
+          "description": "A suggestion.",
+          "type": "string",
+          "const": "hint"
+        }
+      ]
+    },
+    "Span": {
+      "description": "A byte range within the document's source text.\n\nOffsets count UTF-8 bytes from the start of the source, and `end` is\nexclusive. The source file is the enclosing [`Document::source`].",
+      "type": "object",
+      "properties": {
+        "end": {
+          "description": "Offset one past the last byte.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "start": {
+          "description": "Offset of the first byte.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "start",
+        "end"
+      ]
+    },
+    "Strong": {
+      "description": "See [`Node::Strong`].",
+      "type": "object",
+      "properties": {
+        "children": {
+          "description": "Strongly emphasized content.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Node"
+          }
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "Table": {
+      "description": "See [`Node::Table`].",
+      "type": "object",
+      "properties": {
+        "align": {
+          "description": "Alignment of each column.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Align"
+          }
+        },
+        "children": {
+          "description": "The table's rows.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Node"
+          }
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "TableCell": {
+      "description": "See [`Node::TableCell`].",
+      "type": "object",
+      "properties": {
+        "children": {
+          "description": "Content of the cell.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Node"
+          }
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "TableRow": {
+      "description": "See [`Node::TableRow`].",
+      "type": "object",
+      "properties": {
+        "children": {
+          "description": "The row's cells.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Node"
+          }
+        },
+        "header": {
+          "description": "Whether this is a header row.",
+          "type": "boolean",
+          "default": false
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "Text": {
+      "description": "See [`Node::Text`].",
+      "type": "object",
+      "properties": {
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "value": {
+          "description": "The text.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ]
+    },
+    "ThematicBreak": {
+      "description": "See [`Node::ThematicBreak`].",
+      "type": "object",
+      "properties": {
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

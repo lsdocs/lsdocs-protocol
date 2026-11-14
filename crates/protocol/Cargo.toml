@@ -12,4 +12,12 @@ workspace = true
 
 [dependencies]
 lsdocs-doctree.workspace = true
-lsdocs-config.workspace = true
+rmp-serde.workspace = true
+schemars = { workspace = true, optional = true }
+serde.workspace = true
+serde_bytes.workspace = true
+serde_json.workspace = true
+
+[features]
+# Derive JSON Schemas for the public types.
+schema = ["dep:schemars", "lsdocs-doctree/schema"]

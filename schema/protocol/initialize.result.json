@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "InitializeResult",
+  "description": "Result of [`request::Initialize`].",
+  "type": "object",
+  "properties": {
+    "capabilities": {
+      "description": "What the plugin can do.",
+      "$ref": "#/$defs/Capabilities"
+    },
+    "plugin": {
+      "description": "The plugin.",
+      "$ref": "#/$defs/ProgramInfo"
+    },
+    "protocol_version": {
+      "description": "Protocol version the plugin speaks. The host refuses a mismatch.",
+      "type": "integer",
+      "format": "uint32",
+      "minimum": 0
+    }
+  },
+  "required": [
+    "protocol_version",
+    "plugin",
+    "capabilities"
+  ],
+  "$defs": {
+    "Capabilities": {
+      "description": "What a plugin can do. A phase the plugin does not support is omitted.",
+      "type": "object",
+      "properties": {
+        "max_concurrency": {
+          "description": "Most requests the plugin can work on at once; omitted means no\nlimit. Python plugins report 1 because of the GIL.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        },
+        "parse": {
+          "description": "Present if the plugin handles [`request::Parse`].",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ParseCapability"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "render": {
+          "description": "Present if the plugin handles [`request::Render`].",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RenderCapability"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "transform": {
+          "description": "Present if the plugin handles the transform requests.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TransformCapability"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "ParseCapability": {
+      "description": "Parsing capability.",
+      "type": "object",
+      "properties": {
+        "extensions": {
+          "description": "File extensions handled, without the dot, e.g. `[\"md\", \"markdown\"]`.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "extensions"
+      ]
+    },
+    "ProgramInfo": {
+      "description": "Name and version of a program taking part in the protocol.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Program name.",
+          "type": "string"
+        },
+        "version": {
+          "description": "Program version.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ]
+    },
+    "RenderCapability": {
+      "description": "Rendering capability.",
+      "type": "object",
+      "properties": {
+        "formats": {
+          "description": "Output formats produced, e.g. `[\"html\"]`.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "formats"
+      ]
+    },
+    "TransformCapability": {
+      "description": "Transform capability.",
+      "type": "object",
+      "properties": {
+        "collect": {
+          "description": "Whether the plugin handles [`request::TransformCollect`]. If false,\nonly [`request::TransformApply`] is sent.",
+          "type": "boolean",
+          "default": false
+        },
+        "nodes": {
+          "description": "Node kinds the transformer looks at (see `Node::kind` in the doctree\ncrate, e.g. `\"heading\"` or `\"custom:mermaid\"`). Empty means the whole\ndocument.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

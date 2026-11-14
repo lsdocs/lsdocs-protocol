@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ConfigFile",
+  "description": "The contents of `lsdocs.toml`, as written. Unknown keys are rejected so\ntypos are caught.",
+  "type": "object",
+  "properties": {
+    "build": {
+      "description": "Build settings.",
+      "$ref": "#/$defs/BuildSection",
+      "default": {
+        "output_dir": null,
+        "source_dir": null
+      }
+    },
+    "plugins": {
+      "description": "Plugins, in pipeline order within each phase.",
+      "type": "array",
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/PluginEntry"
+      }
+    },
+    "site": {
+      "description": "Site-wide settings.",
+      "$ref": "#/$defs/SiteSection",
+      "default": {
+        "base_url": null,
+        "theme": null,
+        "title": null
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "BuildSection": {
+      "description": "The `[build]` table.",
+      "type": "object",
+      "properties": {
+        "output_dir": {
+          "description": "Directory the site is written to. Defaults to `\"site\"`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_dir": {
+          "description": "Directory holding source documents. Defaults to `\"docs\"`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "PluginEntry": {
+      "description": "One `[[plugins]]` entry. Exactly one of `builtin`, `command` or `runtime`\nsays how to run the plugin.",
+      "type": "object",
+      "properties": {
+        "builtin": {
+          "description": "Name of a first-party plugin to run in-process, e.g.\n`\"parser-markdown\"`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "command": {
+          "description": "Program and arguments to launch.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "entry": {
+          "description": "Node.js entry script.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "files": {
+          "description": "Glob patterns limiting which source files this plugin handles.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "module": {
+          "description": "Python module to run with `python -m`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "description": "Unique name used in logs and diagnostics.",
+          "type": "string"
+        },
+        "options": {
+          "description": "Plugin-specific options, passed to the plugin when it starts."
+        },
+        "runtime": {
+          "description": "Runtime to launch a script plugin with; needs `module` (Python) or\n`entry` (Node).",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Runtime"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "transport": {
+          "description": "How to talk to an out-of-process plugin. Defaults to `\"stdio\"`.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Transport"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ]
+    },
+    "Runtime": {
+      "description": "Runtime for script plugins.",
+      "oneOf": [
+        {
+          "description": "Run with `python -m <module>`.",
+          "type": "string",
+          "const": "python"
+        },
+        {
+          "description": "Run with `node <entry>`.",
+          "type": "string",
+          "const": "node"
+        }
+      ]
+    },
+    "SiteSection": {
+      "description": "The `[site]` table.",
+      "type": "object",
+      "properties": {
+        "base_url": {
+          "description": "URL or path prefix the site is served from, e.g. `\"/docs/\"`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "theme": {
+          "description": "Theme name.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "title": {
+          "description": "Site title.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "Transport": {
+      "description": "Transport for out-of-process plugins.",
+      "oneOf": [
+        {
+          "description": "The plugin's stdin and stdout.",
+          "type": "string",
+          "const": "stdio"
+        },
+        {
+          "description": "A named pipe (Windows) or unix socket whose path is passed to the\nplugin in the `LSDOCS_PIPE` environment variable.",
+          "type": "string",
+          "const": "pipe"
+        }
+      ]
+    }
+  }
+}

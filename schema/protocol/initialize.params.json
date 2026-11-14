@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "InitializeParams",
+  "description": "Parameters of [`request::Initialize`].",
+  "type": "object",
+  "properties": {
+    "host": {
+      "description": "The host.",
+      "$ref": "#/$defs/ProgramInfo"
+    },
+    "options": {
+      "description": "The plugin's `options` from the site config, or null.",
+      "default": null
+    },
+    "protocol_version": {
+      "description": "Protocol version the host speaks.",
+      "type": "integer",
+      "format": "uint32",
+      "minimum": 0
+    },
+    "site": {
+      "description": "The site being built.",
+      "$ref": "#/$defs/SiteInfo",
+      "default": {}
+    }
+  },
+  "required": [
+    "protocol_version",
+    "host"
+  ],
+  "$defs": {
+    "ProgramInfo": {
+      "description": "Name and version of a program taking part in the protocol.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Program name.",
+          "type": "string"
+        },
+        "version": {
+          "description": "Program version.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ]
+    },
+    "SiteInfo": {
+      "description": "Site-wide settings plugins may need, e.g. for building links.",
+      "type": "object",
+      "properties": {
+        "base_url": {
+          "description": "URL or path prefix the site is served from.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "title": {
+          "description": "Site title.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

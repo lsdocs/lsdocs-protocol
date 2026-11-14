@@ -1,0 +1,28 @@
+{
+  "protocol_version": 0,
+  "plugin": {
+    "name": "transform-toc",
+    "version": "0.1.0"
+  },
+  "capabilities": {
+    "parse": {
+      "extensions": [
+        "md",
+        "markdown"
+      ]
+    },
+    "transform": {
+      "nodes": [
+        "heading",
+        "custom:admonition"
+      ],
+      "collect": true
+    },
+    "render": {
+      "formats": [
+        "html"
+      ]
+    },
+    "max_concurrency": 1
+  }
+}

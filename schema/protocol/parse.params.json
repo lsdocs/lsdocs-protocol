@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ParseParams",
+  "description": "Parameters of [`request::Parse`].",
+  "type": "object",
+  "properties": {
+    "source": {
+      "description": "Path of the file relative to the source directory, with `/`\nseparators. Becomes the document's `source`.",
+      "type": "string"
+    },
+    "text": {
+      "description": "The file's text.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "source",
+    "text"
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TransformCollectResult",
+  "description": "Result of [`request::TransformCollect`].",
+  "type": "object",
+  "properties": {
+    "data": {
+      "description": "Data gathered from the document, in any shape the plugin likes.",
+      "default": null
+    },
+    "diagnostics": {
+      "description": "Problems found.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Diagnostic"
+      }
+    }
+  },
+  "$defs": {
+    "Diagnostic": {
+      "description": "A problem to report to the user, modeled on LSP diagnostics.",
+      "type": "object",
+      "properties": {
+        "code": {
+          "description": "A short identifier for the kind of problem, e.g. `\"broken-link\"`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "message": {
+          "description": "What is wrong.",
+          "type": "string"
+        },
+        "severity": {
+          "description": "How serious the problem is.",
+          "$ref": "#/$defs/Severity"
+        },
+        "source": {
+          "description": "Source file the problem is in, relative to the source directory.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "span": {
+          "description": "Where in `source` the problem is.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "severity",
+        "message"
+      ]
+    },
+    "Severity": {
+      "description": "Severity of a [`Diagnostic`].",
+      "oneOf": [
+        {
+          "description": "The build fails.",
+          "type": "string",
+          "const": "error"
+        },
+        {
+          "description": "Probably a mistake, but the build continues.",
+          "type": "string",
+          "const": "warning"
+        },
+        {
+          "description": "Worth knowing.",
+          "type": "string",
+          "const": "info"
+        },
+        {
+          "description": "A suggestion.",
+          "type": "string",
+          "const": "hint"
+        }
+      ]
+    },
+    "Span": {
+      "description": "A byte range within the document's source text.\n\nOffsets count UTF-8 bytes from the start of the source, and `end` is\nexclusive. The source file is the enclosing [`Document::source`].",
+      "type": "object",
+      "properties": {
+        "end": {
+          "description": "Offset one past the last byte.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "start": {
+          "description": "Offset of the first byte.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "start",
+        "end"
+      ]
+    }
+  }
+}

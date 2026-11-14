@@ -1,0 +1,14 @@
+{
+  "protocol_version": 0,
+  "host": {
+    "name": "lsdocs",
+    "version": "0.1.0"
+  },
+  "site": {
+    "title": "My Docs",
+    "base_url": "/docs/"
+  },
+  "options": {
+    "depth": 3
+  }
+}

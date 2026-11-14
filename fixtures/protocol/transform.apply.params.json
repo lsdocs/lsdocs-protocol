@@ -1,0 +1,259 @@
+{
+  "document": {
+    "source": "guide/getting-started.md",
+    "metadata": {
+      "tags": [
+        "intro",
+        "setup"
+      ],
+      "title": "Getting started",
+      "weight": 10
+    },
+    "children": [
+      {
+        "type": "section",
+        "span": {
+          "start": 0,
+          "end": 412
+        },
+        "id": "getting-started",
+        "children": [
+          {
+            "type": "heading",
+            "span": {
+              "start": 0,
+              "end": 17
+            },
+            "level": 1,
+            "id": "getting-started",
+            "children": [
+              {
+                "type": "text",
+                "value": "Getting started"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "span": {
+              "start": 19,
+              "end": 98
+            },
+            "children": [
+              {
+                "type": "text",
+                "value": "Install "
+              },
+              {
+                "type": "inline_code",
+                "value": "lsdocs"
+              },
+              {
+                "type": "text",
+                "value": ", then read the "
+              },
+              {
+                "type": "link",
+                "url": "../reference/config.md",
+                "title": "Configuration reference",
+                "children": [
+                  {
+                    "type": "emphasis",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "config"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "value": " docs."
+              },
+              {
+                "type": "line_break"
+              },
+              {
+                "type": "strong",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "Note:"
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "value": " Unicode is fine — ✓."
+              }
+            ]
+          },
+          {
+            "type": "list",
+            "ordered": true,
+            "start": 3,
+            "children": [
+              {
+                "type": "list_item",
+                "checked": true,
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "Install"
+                  }
+                ]
+              },
+              {
+                "type": "list_item",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "Configure"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "block_quote",
+            "children": [
+              {
+                "type": "paragraph",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "Quoted."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "code_block",
+            "language": "toml",
+            "info": "title=\"lsdocs.toml\"",
+            "value": "[site]\ntitle = \"Docs\"\n"
+          },
+          {
+            "type": "table",
+            "align": [
+              "left",
+              "none",
+              "right"
+            ],
+            "children": [
+              {
+                "type": "table_row",
+                "header": true,
+                "children": [
+                  {
+                    "type": "table_cell",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "Key"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "table_cell",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "Type"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "table_cell",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "Default"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "table_row",
+                "header": false,
+                "children": [
+                  {
+                    "type": "table_cell",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "title"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "table_cell",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "string"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "table_cell",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": ""
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "thematic_break"
+          },
+          {
+            "type": "image",
+            "url": "img/arch.svg",
+            "alt": "Architecture"
+          },
+          {
+            "type": "raw",
+            "format": "html",
+            "value": "<details>"
+          },
+          {
+            "type": "custom",
+            "kind": "admonition",
+            "attrs": {
+              "collapsible": false,
+              "style": "warning"
+            },
+            "children": [
+              {
+                "type": "text",
+                "value": "Back up first."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "collected": {
+    "guide/getting-started.md": {
+      "headings": [
+        {
+          "id": "getting-started",
+          "level": 1
+        }
+      ]
+    },
+    "index.md": {
+      "headings": []
+    }
+  }
+}

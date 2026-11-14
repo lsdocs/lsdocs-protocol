@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CancelParams",
+  "description": "Parameters of [`notification::Cancel`].",
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "Id of the request to cancel.",
+      "type": "integer",
+      "format": "uint32",
+      "minimum": 0
+    }
+  },
+  "required": [
+    "id"
+  ]
+}

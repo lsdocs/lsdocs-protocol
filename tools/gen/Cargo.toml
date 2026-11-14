@@ -1,0 +1,19 @@
+[package]
+name = "lsdocs-gen"
+description = "Generates the JSON Schemas in schema/ and the golden fixtures in fixtures/. Run with `nur gen`."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+lsdocs-config = { workspace = true, features = ["schema"] }
+lsdocs-doctree = { workspace = true, features = ["schema"] }
+lsdocs-protocol = { workspace = true, features = ["schema"] }
+schemars.workspace = true
+serde.workspace = true
+serde_json.workspace = true

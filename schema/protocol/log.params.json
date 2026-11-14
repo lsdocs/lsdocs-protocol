@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LogParams",
+  "description": "Parameters of [`notification::Log`].",
+  "type": "object",
+  "properties": {
+    "level": {
+      "description": "Log level.",
+      "$ref": "#/$defs/LogLevel"
+    },
+    "message": {
+      "description": "The message.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "level",
+    "message"
+  ],
+  "$defs": {
+    "LogLevel": {
+      "description": "Level of a [`LogParams`] message.",
+      "oneOf": [
+        {
+          "description": "Errors.",
+          "type": "string",
+          "const": "error"
+        },
+        {
+          "description": "Warnings.",
+          "type": "string",
+          "const": "warn"
+        },
+        {
+          "description": "General information.",
+          "type": "string",
+          "const": "info"
+        },
+        {
+          "description": "Debugging detail.",
+          "type": "string",
+          "const": "debug"
+        },
+        {
+          "description": "Very verbose detail.",
+          "type": "string",
+          "const": "trace"
+        }
+      ]
+    }
+  }
+}
