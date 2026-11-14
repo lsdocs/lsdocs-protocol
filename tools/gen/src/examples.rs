@@ -5,9 +5,10 @@
 use std::collections::BTreeMap;
 
 use lsdocs_doctree::{
-    Align, BlockQuote, CodeBlock, Custom, Document, Emphasis, Heading, Image, InlineCode,
-    LineBreak, Link, List, ListItem, Paragraph, Raw, Section, Span, Strong, Table, TableCell,
-    TableRow, ThematicBreak, text,
+    Admonition, Align, Anchor, BlockQuote, Caption, CodeBlock, Custom, DefinitionDescription,
+    DefinitionList, DefinitionTerm, Document, Emphasis, Figure, FootnoteDefinition,
+    FootnoteReference, Heading, Image, InlineCode, LineBreak, Link, LinkTarget, List, ListItem,
+    Math, Paragraph, Raw, Section, Span, Strong, Table, TableCell, TableRow, ThematicBreak, text,
 };
 use lsdocs_protocol::{
     CancelParams, Capabilities, Diagnostic, DiagnosticsParams, InitializeParams, InitializeResult,
@@ -43,7 +44,7 @@ pub fn document() -> Document {
                 Heading {
                     span: Some(Span::new(0, 17)),
                     level: 1,
-                    id: Some("getting-started".into()),
+                    id: None,
                     children: vec![text("Getting started")],
                 }
                 .into(),
@@ -60,6 +61,11 @@ pub fn document() -> Document {
                         Link {
                             url: "../reference/config.md".into(),
                             title: Some("Configuration reference".into()),
+                            target: Some(LinkTarget {
+                                document: Some("reference/config.md".into()),
+                                anchor: Some("options".into()),
+                                label: None,
+                            }),
                             children: vec![
                                 Emphasis {
                                     children: vec![text("config")],
@@ -70,7 +76,29 @@ pub fn document() -> Document {
                             ..Link::default()
                         }
                         .into(),
-                        text(" docs."),
+                        text(" docs"),
+                        FootnoteReference {
+                            label: "1".into(),
+                            ..FootnoteReference::default()
+                        }
+                        .into(),
+                        text(". See "),
+                        Link {
+                            url: String::new(),
+                            target: Some(LinkTarget {
+                                label: Some("install-steps".into()),
+                                ..LinkTarget::default()
+                            }),
+                            ..Link::default()
+                        }
+                        .into(),
+                        text(", where "),
+                        Math {
+                            value: "n \\ge 1".into(),
+                            ..Math::default()
+                        }
+                        .into(),
+                        text("."),
                         LineBreak::default().into(),
                         Strong {
                             children: vec![text("Note:")],
@@ -137,10 +165,63 @@ pub fn document() -> Document {
                 }
                 .into(),
                 ThematicBreak::default().into(),
-                Image {
-                    url: "img/arch.svg".into(),
-                    alt: "Architecture".into(),
-                    ..Image::default()
+                Figure {
+                    id: Some("arch".into()),
+                    children: vec![
+                        Image {
+                            url: "img/arch.svg".into(),
+                            alt: "Architecture".into(),
+                            ..Image::default()
+                        }
+                        .into(),
+                        Caption {
+                            children: vec![text("How the pieces fit.")],
+                            ..Caption::default()
+                        }
+                        .into(),
+                    ],
+                    ..Figure::default()
+                }
+                .into(),
+                Anchor {
+                    id: "install-steps".into(),
+                    ..Anchor::default()
+                }
+                .into(),
+                Admonition {
+                    kind: "tip".into(),
+                    title: Some("Before you start".into()),
+                    children: vec![
+                        DefinitionList {
+                            children: vec![
+                                DefinitionTerm {
+                                    children: vec![text("Host")],
+                                    ..DefinitionTerm::default()
+                                }
+                                .into(),
+                                DefinitionDescription {
+                                    children: vec![text("Runs the build.")],
+                                    ..DefinitionDescription::default()
+                                }
+                                .into(),
+                            ],
+                            ..DefinitionList::default()
+                        }
+                        .into(),
+                    ],
+                    ..Admonition::default()
+                }
+                .into(),
+                Math {
+                    value: "E = mc^2".into(),
+                    display: true,
+                    ..Math::default()
+                }
+                .into(),
+                FootnoteDefinition {
+                    label: "1".into(),
+                    children: vec![text("Or any version since 0.1.")],
+                    ..FootnoteDefinition::default()
                 }
                 .into(),
                 Raw {

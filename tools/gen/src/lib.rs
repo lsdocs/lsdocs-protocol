@@ -242,6 +242,16 @@ mod tests {
             "link",
             "image",
             "line_break",
+            "admonition",
+            "definition_list",
+            "definition_term",
+            "definition_description",
+            "footnote_reference",
+            "footnote_definition",
+            "math",
+            "figure",
+            "caption",
+            "anchor",
             "custom:admonition",
         ]
         .into_iter()

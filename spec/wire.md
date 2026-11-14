@@ -72,6 +72,26 @@ without breaking older peers:
   optional field as absent and **ignore unknown fields**.
 - Enums without data are strings (`"warning"`). Document nodes are maps with
   a `"type"` field naming the node kind.
+
+## Document shape
+
+The node kinds and their fields are in `schema/doctree/document.json`.
+Whatever the source format, parsers produce the same shape, so any
+transformer or renderer works with any parser:
+
+- Content under a title is wrapped in a `section` whose first child is the
+  title `heading`; subsections nest inside it. The section's `id` is its
+  anchor. A `heading` has an `id` only when it is not a section title.
+- Parsers set only ids the author wrote. The host gives every other section
+  an id derived from its title after parsing.
+- Common constructs have core kinds: `admonition`, `definition_list`
+  (`definition_term` and `definition_description` children),
+  `footnote_reference` / `footnote_definition`, `math`, `figure` (with an
+  optional `caption` last), and `anchor` (an id with no content). Anything
+  else is `custom` with a plugin-defined `kind`.
+- A `link` to something in the site may carry a `target`: `document`
+  (source path) and/or `anchor`, or an unresolved `label`. Renderers use the
+  target, not the `url`, to build the output link.
 - Binary data (e.g. render output) is MessagePack `bin`.
 - MessagePack extension types are not used.
 

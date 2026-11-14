@@ -24,7 +24,6 @@
             "end": 17
           },
           "level": 1,
-          "id": "getting-started",
           "children": [
             {
               "type": "text",
@@ -55,6 +54,10 @@
               "type": "link",
               "url": "../reference/config.md",
               "title": "Configuration reference",
+              "target": {
+                "document": "reference/config.md",
+                "anchor": "options"
+              },
               "children": [
                 {
                   "type": "emphasis",
@@ -69,7 +72,36 @@
             },
             {
               "type": "text",
-              "value": " docs."
+              "value": " docs"
+            },
+            {
+              "type": "footnote_reference",
+              "label": "1"
+            },
+            {
+              "type": "text",
+              "value": ". See "
+            },
+            {
+              "type": "link",
+              "url": "",
+              "target": {
+                "label": "install-steps"
+              },
+              "children": []
+            },
+            {
+              "type": "text",
+              "value": ", where "
+            },
+            {
+              "type": "math",
+              "value": "n \\ge 1",
+              "display": false
+            },
+            {
+              "type": "text",
+              "value": "."
             },
             {
               "type": "line_break"
@@ -215,9 +247,73 @@
           "type": "thematic_break"
         },
         {
-          "type": "image",
-          "url": "img/arch.svg",
-          "alt": "Architecture"
+          "type": "figure",
+          "id": "arch",
+          "children": [
+            {
+              "type": "image",
+              "url": "img/arch.svg",
+              "alt": "Architecture"
+            },
+            {
+              "type": "caption",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "How the pieces fit."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "anchor",
+          "id": "install-steps"
+        },
+        {
+          "type": "admonition",
+          "kind": "tip",
+          "title": "Before you start",
+          "children": [
+            {
+              "type": "definition_list",
+              "children": [
+                {
+                  "type": "definition_term",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Host"
+                    }
+                  ]
+                },
+                {
+                  "type": "definition_description",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Runs the build."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "math",
+          "value": "E = mc^2",
+          "display": true
+        },
+        {
+          "type": "footnote_definition",
+          "label": "1",
+          "children": [
+            {
+              "type": "text",
+              "value": "Or any version since 0.1."
+            }
+          ]
         },
         {
           "type": "raw",

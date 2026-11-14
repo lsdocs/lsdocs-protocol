@@ -26,6 +26,45 @@
     "source"
   ],
   "$defs": {
+    "Admonition": {
+      "description": "See [`Node::Admonition`].",
+      "type": "object",
+      "properties": {
+        "children": {
+          "description": "Content.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Node"
+          }
+        },
+        "kind": {
+          "description": "What kind of callout, e.g. `\"note\"`, `\"tip\"`, `\"warning\"`.",
+          "type": "string"
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "title": {
+          "description": "A title replacing the kind's default one.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kind"
+      ]
+    },
     "Align": {
       "description": "Horizontal alignment of a table column.",
       "oneOf": [
@@ -51,12 +90,61 @@
         }
       ]
     },
+    "Anchor": {
+      "description": "See [`Node::Anchor`].",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The anchor identifier.",
+          "type": "string"
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id"
+      ]
+    },
     "BlockQuote": {
       "description": "See [`Node::BlockQuote`].",
       "type": "object",
       "properties": {
         "children": {
           "description": "Quoted content.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Node"
+          }
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "Caption": {
+      "description": "See [`Node::Caption`].",
+      "type": "object",
+      "properties": {
+        "children": {
+          "description": "Content.",
           "type": "array",
           "default": [],
           "items": {
@@ -151,6 +239,81 @@
         "kind"
       ]
     },
+    "DefinitionDescription": {
+      "description": "See [`Node::DefinitionDescription`].",
+      "type": "object",
+      "properties": {
+        "children": {
+          "description": "Content.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Node"
+          }
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "DefinitionList": {
+      "description": "See [`Node::DefinitionList`].",
+      "type": "object",
+      "properties": {
+        "children": {
+          "description": "Terms and descriptions, in order.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Node"
+          }
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "DefinitionTerm": {
+      "description": "See [`Node::DefinitionTerm`].",
+      "type": "object",
+      "properties": {
+        "children": {
+          "description": "Inline content.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Node"
+          }
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
     "Emphasis": {
       "description": "See [`Node::Emphasis`].",
       "type": "object",
@@ -176,6 +339,94 @@
         }
       }
     },
+    "Figure": {
+      "description": "See [`Node::Figure`].",
+      "type": "object",
+      "properties": {
+        "children": {
+          "description": "Content, then an optional caption.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Node"
+          }
+        },
+        "id": {
+          "description": "Anchor identifier, e.g. for linking to the figure.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "FootnoteDefinition": {
+      "description": "See [`Node::FootnoteDefinition`].",
+      "type": "object",
+      "properties": {
+        "children": {
+          "description": "Content.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Node"
+          }
+        },
+        "label": {
+          "description": "The label references use.",
+          "type": "string"
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "label"
+      ]
+    },
+    "FootnoteReference": {
+      "description": "See [`Node::FootnoteReference`].",
+      "type": "object",
+      "properties": {
+        "label": {
+          "description": "The footnote's label, e.g. `\"1\"` or `\"note\"`.",
+          "type": "string"
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "label"
+      ]
+    },
     "Heading": {
       "description": "See [`Node::Heading`].",
       "type": "object",
@@ -189,14 +440,14 @@
           }
         },
         "id": {
-          "description": "Anchor identifier, e.g. for linking to the heading.",
+          "description": "Anchor identifier, only for headings that are not a section's\ntitle (a section's anchor is [`Section::id`]).",
           "type": [
             "string",
             "null"
           ]
         },
         "level": {
-          "description": "Heading level, from 1 (top) to 6.",
+          "description": "Heading level, from 1 (top) to 6. For a section title this is\nthe level as written, which may skip levels; the nesting of\nsections is the structure.",
           "type": "integer",
           "format": "uint8",
           "maximum": 255,
@@ -318,6 +569,17 @@
             }
           ]
         },
+        "target": {
+          "description": "Where the link points inside the site, if it is a\ncross-reference. Renderers prefer it over `url`.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LinkTarget"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "title": {
           "description": "Link title (often shown as a tooltip).",
           "type": [
@@ -333,6 +595,33 @@
       "required": [
         "url"
       ]
+    },
+    "LinkTarget": {
+      "description": "The site-internal destination of a [`Link`].\n\nA resolved target names a document, an anchor, or both (an anchor alone\nmeans the linking document). An unresolved one has only a `label`, to be\nlooked up among the anchors of every document, e.g. by a transformer.",
+      "type": "object",
+      "properties": {
+        "anchor": {
+          "description": "Anchor id within the target document.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "document": {
+          "description": "Source path of the target document, relative to the source\ndirectory with `/` separators.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "label": {
+          "description": "A label naming the target, not yet resolved to a document and\nanchor.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
     },
     "List": {
       "description": "See [`Node::List`].",
@@ -404,6 +693,35 @@
           ]
         }
       }
+    },
+    "Math": {
+      "description": "See [`Node::Math`].",
+      "type": "object",
+      "properties": {
+        "display": {
+          "description": "Whether it is set on its own line rather than inline.",
+          "type": "boolean",
+          "default": false
+        },
+        "span": {
+          "description": "Where this node came from in the source, if known.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "value": {
+          "description": "The formula, e.g. in TeX notation.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ]
     },
     "Node": {
       "description": "A node in the document tree.\n\nSerialized with a `type` tag holding the [`Node::kind`] name, for core\nkinds, followed by the variant's fields.",
@@ -675,6 +993,146 @@
           ]
         },
         {
+          "description": "A callout such as a note or warning.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "admonition"
+            }
+          },
+          "$ref": "#/$defs/Admonition",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "A list of terms and their descriptions: children alternate between\n[`Node::DefinitionTerm`] and one or more\n[`Node::DefinitionDescription`]s.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "definition_list"
+            }
+          },
+          "$ref": "#/$defs/DefinitionList",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "A term in a [`DefinitionList`].",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "definition_term"
+            }
+          },
+          "$ref": "#/$defs/DefinitionTerm",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "The description of the term before it in a [`DefinitionList`].",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "definition_description"
+            }
+          },
+          "$ref": "#/$defs/DefinitionDescription",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "A reference to a footnote, e.g. `[^1]`.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "footnote_reference"
+            }
+          },
+          "$ref": "#/$defs/FootnoteReference",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "The text of a footnote.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "footnote_definition"
+            }
+          },
+          "$ref": "#/$defs/FootnoteDefinition",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "A mathematical formula, inline or on its own line.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "math"
+            }
+          },
+          "$ref": "#/$defs/Math",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "Content (usually an image) with an optional [`Node::Caption`] as its\nlast child.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "figure"
+            }
+          },
+          "$ref": "#/$defs/Figure",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "The caption of a [`Figure`].",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "caption"
+            }
+          },
+          "$ref": "#/$defs/Caption",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "A link target with no content of its own, e.g. a reStructuredText\nlabel in front of a paragraph.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "anchor"
+            }
+          },
+          "$ref": "#/$defs/Anchor",
+          "required": [
+            "type"
+          ]
+        },
+        {
           "description": "A node kind defined by a plugin rather than by lsdocs.",
           "type": "object",
           "properties": {
@@ -757,7 +1215,7 @@
           }
         },
         "id": {
-          "description": "Anchor identifier, e.g. for linking to the section.",
+          "description": "Anchor identifier for linking to the section. Set by the parser\nif the author gave one; otherwise the host derives one from the\ntitle.",
           "type": [
             "string",
             "null"
