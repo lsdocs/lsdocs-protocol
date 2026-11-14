@@ -147,6 +147,16 @@ work finished first; the canceller ignores it.
 4. Host -> plugin request `shutdown`, then notification `exit`. The plugin
    exits; closing the stream also ends the session.
 
+## Caching
+
+A plugin whose results depend only on the request, the site settings and
+its name, version and options may say so with `cache` in its capabilities:
+a string covering any other input it reads (for example a digest of a
+template file), or `""` if there is none. The host may then reuse an
+earlier result for the same inputs instead of sending the request. A plugin
+without `cache` is never cached. Diagnostics in a cached result are
+reported again; notifications sent while producing it are not.
+
 ## Example
 
 The notification `initialized` (no params) is the 3-element array

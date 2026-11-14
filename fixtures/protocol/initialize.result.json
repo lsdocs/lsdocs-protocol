@@ -24,6 +24,7 @@
       ],
       "site": true
     },
-    "max_concurrency": 1
+    "max_concurrency": 1,
+    "cache": "template:3f9a2c"
   }
 }

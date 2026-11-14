@@ -213,6 +213,14 @@ pub struct Capabilities {
     /// limit. Python plugins report 1 because of the GIL.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub max_concurrency: Option<u32>,
+    /// Present if the plugin's results may be cached: they depend only on
+    /// the request, the site settings, the plugin's name, version and
+    /// options, and this key. A plugin that reads anything else (say, a
+    /// template file its options name) puts a digest of it in the key, so
+    /// the cache is invalidated when that changes. Omitted means never
+    /// cache.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cache: Option<String>,
 }
 
 /// Parsing capability.

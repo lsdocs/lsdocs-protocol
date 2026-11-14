@@ -312,6 +312,7 @@ impl Messages {
                         site: true,
                     }),
                     max_concurrency: Some(1),
+                    cache: Some("template:3f9a2c".into()),
                 },
             },
             parse_params: ParseParams {

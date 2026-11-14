@@ -29,6 +29,13 @@
       "description": "What a plugin can do. A phase the plugin does not support is omitted.",
       "type": "object",
       "properties": {
+        "cache": {
+          "description": "Present if the plugin's results may be cached: they depend only on\nthe request, the site settings, the plugin's name, version and\noptions, and this key. A plugin that reads anything else (say, a\ntemplate file its options name) puts a digest of it in the key, so\nthe cache is invalidated when that changes. Omitted means never\ncache.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "max_concurrency": {
           "description": "Most requests the plugin can work on at once; omitted means no\nlimit. Python plugins report 1 because of the GIL.",
           "type": [
