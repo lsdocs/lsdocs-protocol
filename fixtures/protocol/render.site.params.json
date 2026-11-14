@@ -1,0 +1,12 @@
+{
+  "format": "html",
+  "pages": [
+    {
+      "source": "guide/getting-started.md",
+      "path": "guide/getting-started.html",
+      "metadata": {
+        "title": "Getting started"
+      }
+    }
+  ]
+}

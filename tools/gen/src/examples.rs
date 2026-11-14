@@ -11,10 +11,10 @@ use lsdocs_doctree::{
 };
 use lsdocs_protocol::{
     CancelParams, Capabilities, Diagnostic, DiagnosticsParams, InitializeParams, InitializeResult,
-    LogLevel, LogParams, PROTOCOL_VERSION, ParseCapability, ParseParams, ParseResult, ProgramInfo,
-    ProgressParams, RenderCapability, RenderParams, RenderResult, Severity, SiteInfo,
-    TransformApplyParams, TransformApplyResult, TransformCapability, TransformCollectParams,
-    TransformCollectResult,
+    LogLevel, LogParams, OutputFile, PROTOCOL_VERSION, ParseCapability, ParseParams, ParseResult,
+    ProgramInfo, ProgressParams, RenderCapability, RenderParams, RenderResult, RenderSiteParams,
+    RenderSiteResult, RenderedPage, Severity, SiteInfo, TransformApplyParams, TransformApplyResult,
+    TransformCapability, TransformCollectParams, TransformCollectResult,
 };
 use serde_json::json;
 
@@ -178,6 +178,8 @@ pub struct Messages {
     pub apply_result: TransformApplyResult,
     pub render_params: RenderParams,
     pub render_result: RenderResult,
+    pub render_site_params: RenderSiteParams,
+    pub render_site_result: RenderSiteResult,
     pub cancel: CancelParams,
     pub log: LogParams,
     pub progress: ProgressParams,
@@ -225,6 +227,7 @@ impl Messages {
                     }),
                     render: Some(RenderCapability {
                         formats: vec!["html".into()],
+                        site: true,
                     }),
                     max_concurrency: Some(1),
                 },
@@ -264,6 +267,21 @@ impl Messages {
                     .as_bytes()
                     .to_vec(),
                 extension: "html".into(),
+                diagnostics: vec![],
+            },
+            render_site_params: RenderSiteParams {
+                format: "html".into(),
+                pages: vec![RenderedPage {
+                    source: "guide/getting-started.md".into(),
+                    path: "guide/getting-started.html".into(),
+                    metadata: BTreeMap::from([("title".into(), json!("Getting started"))]),
+                }],
+            },
+            render_site_result: RenderSiteResult {
+                files: vec![OutputFile {
+                    path: "sitemap.xml".into(),
+                    output: b"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n".to_vec(),
+                }],
                 diagnostics: vec![],
             },
             cancel: CancelParams { id: 42 },

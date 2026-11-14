@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RenderSiteParams",
+  "description": "Parameters of [`request::RenderSite`].",
+  "type": "object",
+  "properties": {
+    "format": {
+      "description": "Output format the pages were rendered to.",
+      "type": "string"
+    },
+    "pages": {
+      "description": "Every page rendered, sorted by source path.",
+      "type": "array",
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/RenderedPage"
+      }
+    }
+  },
+  "required": [
+    "format"
+  ],
+  "$defs": {
+    "RenderedPage": {
+      "description": "A page written by the render phase.",
+      "type": "object",
+      "properties": {
+        "metadata": {
+          "description": "The document's metadata after the transform phase.",
+          "type": "object",
+          "additionalProperties": true
+        },
+        "path": {
+          "description": "Where the page was written, relative to the output directory, with\n`/` separators, e.g. `guide/intro.html`.",
+          "type": "string"
+        },
+        "source": {
+          "description": "The document's source path.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "path"
+      ]
+    }
+  }
+}

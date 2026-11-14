@@ -21,7 +21,8 @@
     "render": {
       "formats": [
         "html"
-      ]
+      ],
+      "site": true
     },
     "max_concurrency": 1
   }

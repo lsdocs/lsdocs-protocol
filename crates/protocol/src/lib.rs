@@ -13,7 +13,8 @@
 //! 2. Host → plugin: [`notification::Initialized`].
 //! 3. Phase requests, as the plugin's capabilities allow:
 //!    [`request::Parse`], [`request::TransformCollect`],
-//!    [`request::TransformApply`], [`request::Render`].
+//!    [`request::TransformApply`], [`request::Render`], then once
+//!    [`request::RenderSite`].
 //! 4. Host → plugin: [`request::Shutdown`], then [`notification::Exit`].
 //!
 //! Plugins may send [`notification::Log`], [`notification::Progress`] and
@@ -30,7 +31,7 @@
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 
 pub use lsdocs_doctree as doctree;
-use lsdocs_doctree::{Document, Span, Value};
+use lsdocs_doctree::{Document, Metadata, Span, Value};
 
 /// Protocol version spoken by this crate. Version 0 is unstable: any change
 /// may break compatibility until version 1 is frozen.
@@ -87,6 +88,10 @@ pub mod request {
         TransformApply = "transform/apply", TransformApplyParams => TransformApplyResult;
         /// Host → plugin. Renders one document to an output format.
         Render = "render", RenderParams => RenderResult;
+        /// Host → plugin. Sent once after every document is rendered, if
+        /// the renderer asked for it ([`RenderCapability::site`]): returns
+        /// site-wide files such as a sitemap.
+        RenderSite = "render/site", RenderSiteParams => RenderSiteResult;
     }
 }
 
@@ -235,6 +240,13 @@ pub struct TransformCapability {
 pub struct RenderCapability {
     /// Output formats produced, e.g. `["html"]`.
     pub formats: Vec<String>,
+    /// Whether the plugin handles [`request::RenderSite`].
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub site: bool,
+}
+
+fn is_false(value: &bool) -> bool {
+    !value
 }
 
 // ---------------------------------------------------------------------------
@@ -330,6 +342,56 @@ pub struct RenderResult {
     /// Problems found.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub diagnostics: Vec<Diagnostic>,
+}
+
+/// Parameters of [`request::RenderSite`].
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct RenderSiteParams {
+    /// Output format the pages were rendered to.
+    pub format: String,
+    /// Every page rendered, sorted by source path.
+    #[serde(default)]
+    pub pages: Vec<RenderedPage>,
+}
+
+/// A page written by the render phase.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct RenderedPage {
+    /// The document's source path.
+    pub source: String,
+    /// Where the page was written, relative to the output directory, with
+    /// `/` separators, e.g. `guide/intro.html`.
+    pub path: String,
+    /// The document's metadata after the transform phase.
+    #[serde(default, skip_serializing_if = "Metadata::is_empty")]
+    pub metadata: Metadata,
+}
+
+/// Result of [`request::RenderSite`].
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct RenderSiteResult {
+    /// Extra files to write.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub files: Vec<OutputFile>,
+    /// Problems found.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub diagnostics: Vec<Diagnostic>,
+}
+
+/// A file for the host to write.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct OutputFile {
+    /// Path relative to the output directory, with `/` separators. It may
+    /// not leave the output directory or replace a rendered page.
+    pub path: String,
+    /// The file's content. Sent as MessagePack `bin`.
+    #[serde(with = "serde_bytes")]
+    #[cfg_attr(feature = "schema", schemars(with = "Vec<u8>"))]
+    pub output: Vec<u8>,
 }
 
 // ---------------------------------------------------------------------------
@@ -524,5 +586,6 @@ mod tests {
     fn method_names() {
         assert_eq!(request::TransformCollect::METHOD, "transform/collect");
         assert_eq!(notification::Cancel::METHOD, "$/cancel");
+        assert_eq!(request::RenderSite::METHOD, "render/site");
     }
 }
