@@ -82,8 +82,21 @@ transformer or renderer works with any parser:
 - Content under a title is wrapped in a `section` whose first child is the
   title `heading`; subsections nest inside it. The section's `id` is its
   anchor. A `heading` has an `id` only when it is not a section title.
-- Parsers set only ids the author wrote. The host gives every other section
-  an id derived from its title after parsing.
+- Parsers set only ids the author wrote. After parsing, the host gives
+  every other section, and every heading that is not a section title, an
+  id: the slug of its title text, made unique within the document.
+  - Slug: lowercase the text; keep letters and digits (Unicode
+    alphanumerics); replace each run of other characters with one `-`; drop
+    `-` at either end. An empty slug becomes `section`.
+  - Unique: ids the author wrote (on sections, headings, figures and
+    anchors) are reserved first. A slug already taken gets `-1`, `-2`, ...
+    appended, the first free one winning, in document order.
+  - An id the author wrote twice in one document is a `duplicate-id`
+    warning.
+- The host also sets `target` on links without one whose `url` is a
+  relative path to a parsed document (`target.document`, plus
+  `target.anchor` from any `#fragment`) or a bare `#fragment`
+  (`target.anchor` only).
 - Common constructs have core kinds: `admonition`, `definition_list`
   (`definition_term` and `definition_description` children),
   `footnote_reference` / `footnote_definition`, `math`, `figure` (with an
