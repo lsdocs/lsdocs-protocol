@@ -161,6 +161,10 @@ pub struct SiteInfo {
     /// process's working directory: builtin plugins run inside the host.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub root: Option<String>,
+    /// Absolute path of the source directory, which document `source`
+    /// paths are relative to (e.g. for parsers that read included files).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_dir: Option<String>,
     /// Every file under the source directory (documents and static assets
     /// alike), relative to it with `/` separators, sorted. Lets transformers
     /// check links to files that are not documents, such as images.

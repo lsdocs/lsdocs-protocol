@@ -72,6 +72,13 @@
             "null"
           ]
         },
+        "source_dir": {
+          "description": "Absolute path of the source directory, which document `source`\npaths are relative to (e.g. for parsers that read included files).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "title": {
           "description": "Site title.",
           "type": [

@@ -8,6 +8,7 @@
     "title": "My Docs",
     "base_url": "/docs/",
     "root": "/home/me/my-docs",
+    "source_dir": "/home/me/my-docs/docs",
     "files": [
       "guide.md",
       "img/logo.svg",
