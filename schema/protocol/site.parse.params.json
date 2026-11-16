@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SiteParseParams",
+  "description": "Parameters of [`request::SiteParse`].",
+  "type": "object",
+  "properties": {
+    "extension": {
+      "description": "The extension of the files whose parser should parse the text,\nwithout the dot, e.g. `\"md\"` or `\"rst\"`.",
+      "type": "string"
+    },
+    "source": {
+      "description": "The source path to give the parsed document (and its diagnostics),\nusually the document the text will be part of.",
+      "type": "string"
+    },
+    "text": {
+      "description": "The text.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "extension",
+    "source",
+    "text"
+  ]
+}

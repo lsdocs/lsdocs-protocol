@@ -15,9 +15,9 @@ use lsdocs_protocol::{
     DirectiveSyntax, InitializeParams, InitializeResult, LogLevel, LogParams, OptionSyntax,
     OutputFile, PROTOCOL_VERSION, ParseCapability, ParseParams, ParseResult, ProgramInfo,
     ProgressParams, RenderCapability, RenderParams, RenderResult, RenderSiteParams,
-    RenderSiteResult, RenderedPage, RoleSyntax, Severity, SiteInfo, Syntax, TransformApplyParams,
-    TransformApplyResult, TransformCapability, TransformCollectParams, TransformCollectResult,
-    TransformCollectedParams, TransformCollectedResult,
+    RenderSiteResult, RenderedPage, RoleSyntax, Severity, SiteInfo, SiteParseParams, Syntax,
+    TransformApplyParams, TransformApplyResult, TransformCapability, TransformCollectParams,
+    TransformCollectResult, TransformCollectedParams, TransformCollectedResult,
 };
 use serde_json::json;
 
@@ -257,6 +257,8 @@ pub struct Messages {
     pub parse_result: ParseResult,
     pub collect_params: TransformCollectParams,
     pub collect_result: TransformCollectResult,
+    pub site_parse_params: SiteParseParams,
+    pub site_parse_result: ParseResult,
     pub collected_params: TransformCollectedParams,
     pub collected_result: TransformCollectedResult,
     pub apply_params: TransformApplyParams,
@@ -328,6 +330,7 @@ impl Messages {
             parse_result: ParseResult {
                 document: doc.clone(),
                 diagnostics: vec![],
+                dependencies: vec!["docs/snippets/install.sh".into()],
             },
             collect_params: TransformCollectParams {
                 document: doc.clone(),
@@ -335,6 +338,27 @@ impl Messages {
             collect_result: TransformCollectResult {
                 data: json!({"headings": [{"id": "getting-started", "level": 1}]}),
                 diagnostics: vec![],
+                dependencies: vec![],
+            },
+            site_parse_params: SiteParseParams {
+                extension: "md".into(),
+                source: "api/lsdocs.md".into(),
+                text: "Builds the *site*.".into(),
+            },
+            site_parse_result: ParseResult {
+                document: {
+                    let mut d = Document::new("api/lsdocs.md");
+                    d.children = vec![
+                        Paragraph {
+                            span: Some(Span::new(0, 18)),
+                            children: vec![text("Builds the site.")],
+                        }
+                        .into(),
+                    ];
+                    d
+                },
+                diagnostics: vec![],
+                dependencies: vec![],
             },
             collected_params: TransformCollectedParams {
                 collected: json!({
@@ -357,6 +381,7 @@ impl Messages {
                     index
                 }],
                 diagnostics: vec![],
+                dependencies: vec![],
             },
             apply_params: TransformApplyParams {
                 document: doc.clone(),
@@ -368,6 +393,7 @@ impl Messages {
             apply_result: TransformApplyResult {
                 document: doc.clone(),
                 diagnostics: vec![warning.clone()],
+                dependencies: vec![],
             },
             render_params: RenderParams {
                 document: doc,

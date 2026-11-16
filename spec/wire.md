@@ -149,6 +149,7 @@ Params and results are in `schema/protocol/<name>.params.json` and
 | `transform/apply` | request | host -> plugin | `transform.apply.params` | `transform.apply.result` |
 | `render` | request | host -> plugin | `render.params` | `render.result` |
 | `render/site` | request | host -> plugin | `render.site.params` | `render.site.result` |
+| `site/parse` | request | plugin -> host | `site.parse.params` | `site.parse.result` |
 | `shutdown` | request | host -> plugin | none | nil |
 | `exit` | notification | host -> plugin | none | |
 | `$/cancel` | notification | either | `cancel.params` | |
@@ -203,7 +204,13 @@ phase the plugin does not support is omitted:
       result lists extra files, such as a sitemap.
 
    The plugin may send `log`, `progress` and `diagnostics` notifications at
-   any time.
+   any time. While it handles a phase request it may send `site/parse`
+   requests: the host parses the text with the first parser (in config
+   order) taking files of the given `extension`, giving it the site's
+   syntax extensions, and answers with that parser's result, not
+   normalized. A plugin uses it for text in a markup it does not parse
+   itself, such as doc comments. (A plugin that parses and asks for its
+   own extension while at its `max_concurrency` would wait forever.)
 4. Host -> plugin request `shutdown`, then notification `exit`. The plugin
    exits; closing the stream also ends the session.
 
@@ -346,6 +353,14 @@ template file), or `""` if there is none. The host may then reuse an
 earlier result for the same inputs instead of sending the request. A plugin
 without `cache` is never cached. Diagnostics in a cached result are
 reported again; notifications sent while producing it are not.
+
+Results of `parse`, `transform/collect`, `transform/apply` and
+`transform/collected` may list `dependencies`: files they depend on
+besides the request (included files, the source code of generated pages),
+as absolute paths or relative to the site directory. A cached result is
+reused only while each is unchanged (one that was missing must still be
+missing), and `lsdocs serve` rebuilds when one changes, even outside the
+site directory.
 
 ## Example session
 

@@ -338,5 +338,8 @@
         ]
       }
     ]
-  }
+  },
+  "dependencies": [
+    "docs/snippets/install.sh"
+  ]
 }

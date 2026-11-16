@@ -73,6 +73,7 @@ pub fn outputs() -> io::Result<Vec<Output>> {
     request::<request::TransformApply>(&mut out, ex.apply_params, ex.apply_result);
     request::<request::TransformCollected>(&mut out, ex.collected_params, ex.collected_result);
     request::<request::Render>(&mut out, ex.render_params, ex.render_result);
+    request::<request::SiteParse>(&mut out, ex.site_parse_params, ex.site_parse_result);
     request::<request::RenderSite>(&mut out, ex.render_site_params, ex.render_site_result);
     notification::<notification::Initialized>(&mut out, ());
     notification::<notification::Exit>(&mut out, ());

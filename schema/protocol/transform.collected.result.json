@@ -4,6 +4,13 @@
   "description": "Result of [`request::TransformCollected`].",
   "type": "object",
   "properties": {
+    "dependencies": {
+      "description": "Files the result depends on besides the request, such as included\nfiles: absolute paths, or paths relative to the site directory\n(`site.root`), with `/` separators. A cached result is only reused\nwhile they are unchanged (a file that did not exist must still not\nexist), and `lsdocs serve` rebuilds when they change. List files\nlooked for but missing too.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "diagnostics": {
       "description": "Problems found.",
       "type": "array",

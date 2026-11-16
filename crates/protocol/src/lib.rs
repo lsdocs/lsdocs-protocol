@@ -107,6 +107,11 @@ pub mod request {
         TransformApply = "transform/apply", TransformApplyParams => TransformApplyResult;
         /// Host -> plugin. Renders one document to an output format.
         Render = "render", RenderParams => RenderResult;
+        /// Plugin -> host. Parses a piece of text with the parser that
+        /// takes files of an extension, e.g. a doc comment written in
+        /// Markdown, while the plugin works on a request. The result is not
+        /// normalized.
+        SiteParse = "site/parse", SiteParseParams => ParseResult;
         /// Host -> plugin. Sent once after every document is rendered, if
         /// the renderer asked for it ([`RenderCapability::site`]): returns
         /// site-wide files such as a sitemap.
@@ -446,6 +451,20 @@ pub struct ParseParams {
     pub syntax: Syntax,
 }
 
+/// Parameters of [`request::SiteParse`].
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct SiteParseParams {
+    /// The extension of the files whose parser should parse the text,
+    /// without the dot, e.g. `"md"` or `"rst"`.
+    pub extension: String,
+    /// The source path to give the parsed document (and its diagnostics),
+    /// usually the document the text will be part of.
+    pub source: String,
+    /// The text.
+    pub text: String,
+}
+
 /// Result of [`request::Parse`].
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -455,6 +474,14 @@ pub struct ParseResult {
     /// Problems found while parsing.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub diagnostics: Vec<Diagnostic>,
+    /// Files the result depends on besides the request, such as included
+    /// files: absolute paths, or paths relative to the site directory
+    /// (`site.root`), with `/` separators. A cached result is only reused
+    /// while they are unchanged (a file that did not exist must still not
+    /// exist), and `lsdocs serve` rebuilds when they change. List files
+    /// looked for but missing too.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub dependencies: Vec<String>,
 }
 
 /// Parameters of [`request::TransformCollect`].
@@ -475,6 +502,14 @@ pub struct TransformCollectResult {
     /// Problems found.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub diagnostics: Vec<Diagnostic>,
+    /// Files the result depends on besides the request, such as included
+    /// files: absolute paths, or paths relative to the site directory
+    /// (`site.root`), with `/` separators. A cached result is only reused
+    /// while they are unchanged (a file that did not exist must still not
+    /// exist), and `lsdocs serve` rebuilds when they change. List files
+    /// looked for but missing too.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub dependencies: Vec<String>,
 }
 
 /// Parameters of [`request::TransformCollected`].
@@ -501,6 +536,14 @@ pub struct TransformCollectedResult {
     /// Problems found.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub diagnostics: Vec<Diagnostic>,
+    /// Files the result depends on besides the request, such as included
+    /// files: absolute paths, or paths relative to the site directory
+    /// (`site.root`), with `/` separators. A cached result is only reused
+    /// while they are unchanged (a file that did not exist must still not
+    /// exist), and `lsdocs serve` rebuilds when they change. List files
+    /// looked for but missing too.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub dependencies: Vec<String>,
 }
 
 /// Parameters of [`request::TransformApply`].
@@ -527,6 +570,14 @@ pub struct TransformApplyResult {
     /// Problems found.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub diagnostics: Vec<Diagnostic>,
+    /// Files the result depends on besides the request, such as included
+    /// files: absolute paths, or paths relative to the site directory
+    /// (`site.root`), with `/` separators. A cached result is only reused
+    /// while they are unchanged (a file that did not exist must still not
+    /// exist), and `lsdocs serve` rebuilds when they change. List files
+    /// looked for but missing too.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub dependencies: Vec<String>,
 }
 
 /// Parameters of [`request::Render`].
