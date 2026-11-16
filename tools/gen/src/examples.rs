@@ -280,7 +280,7 @@ impl Messages {
         };
         Self {
             initialize_params: InitializeParams {
-                protocol_version: PROTOCOL_VERSION,
+                protocol_version: PROTOCOL_VERSION.into(),
                 host: ProgramInfo {
                     name: "lsdocs".into(),
                     version: "0.1.0".into(),
@@ -295,7 +295,7 @@ impl Messages {
                 options: json!({"depth": 3}),
             },
             initialize_result: InitializeResult {
-                protocol_version: PROTOCOL_VERSION,
+                protocol_version: PROTOCOL_VERSION.into(),
                 plugin: ProgramInfo {
                     name: "transform-toc".into(),
                     version: "0.1.0".into(),

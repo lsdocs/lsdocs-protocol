@@ -13,10 +13,8 @@
       "$ref": "#/$defs/ProgramInfo"
     },
     "protocol_version": {
-      "description": "Protocol version the plugin speaks. The host refuses a mismatch.",
-      "type": "integer",
-      "format": "uint32",
-      "minimum": 0
+      "description": "Protocol version the plugin speaks. The host ends the session if it\nis not [`compatible`] with its own.",
+      "type": "string"
     }
   },
   "required": [

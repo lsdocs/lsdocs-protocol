@@ -33,9 +33,22 @@ use serde::{Deserialize, Serialize, de::DeserializeOwned};
 pub use lsdocs_doctree as doctree;
 use lsdocs_doctree::{Document, Metadata, Span, Value};
 
-/// Protocol version spoken by this crate. Version 0 is unstable: any change
-/// may break compatibility until version 1 is frozen.
-pub const PROTOCOL_VERSION: u32 = 0;
+/// Protocol version spoken by this crate: `MAJOR.MINOR`, with `-rc.N` for
+/// a release candidate. See [`compatible`] and "Versions" in
+/// `spec/wire.md`.
+pub const PROTOCOL_VERSION: &str = "1.0-rc.0";
+
+/// Whether peers speaking protocol versions `a` and `b` can talk: the same
+/// major version, and, if either is a release candidate, the very same
+/// version. Minor versions only add things older peers can ignore.
+pub fn compatible(a: &str, b: &str) -> bool {
+    let major = |v: &str| v.split(['.', '-']).next().map(str::to_owned);
+    let prerelease = |v: &str| v.contains('-');
+    if prerelease(a) || prerelease(b) {
+        return a == b;
+    }
+    major(a).is_some_and(|m| !m.is_empty() && major(b) == Some(m))
+}
 
 /// A request: a message that expects a response.
 pub trait Request {
@@ -176,8 +189,8 @@ pub struct SiteInfo {
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct InitializeParams {
-    /// Protocol version the host speaks.
-    pub protocol_version: u32,
+    /// Protocol version the host speaks, e.g. `"1.0"`.
+    pub protocol_version: String,
     /// The host.
     pub host: ProgramInfo,
     /// The site being built.
@@ -192,8 +205,9 @@ pub struct InitializeParams {
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct InitializeResult {
-    /// Protocol version the plugin speaks. The host refuses a mismatch.
-    pub protocol_version: u32,
+    /// Protocol version the plugin speaks. The host ends the session if it
+    /// is not [`compatible`] with its own.
+    pub protocol_version: String,
     /// The plugin.
     pub plugin: ProgramInfo,
     /// What the plugin can do.
@@ -545,6 +559,17 @@ pub mod msgpack {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn versions_are_compatible_within_a_major_version() {
+        use super::compatible;
+        assert!(compatible("1.0", "1.3"));
+        assert!(!compatible("1.0", "2.0"));
+        assert!(compatible("1.0-rc.0", "1.0-rc.0"));
+        assert!(!compatible("1.0-rc.0", "1.0-rc.1"));
+        assert!(!compatible("1.0-rc.0", "1.0"));
+        assert!(!compatible("", ""));
+    }
+
     use super::*;
     use lsdocs_doctree::{Heading, text};
     use std::fmt::Debug;

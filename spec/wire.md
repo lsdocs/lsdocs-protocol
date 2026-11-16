@@ -1,12 +1,71 @@
 # lsdocs wire protocol
 
-Status: **draft, protocol version 0** (unstable until version 1 is frozen).
+Status: **release candidate, protocol version `1.0-rc.0`**. See
+[Versions](#versions) for what may still change.
 
 This document describes the bytes exchanged between the lsdocs host and a
 plugin. It is enough to write a plugin in any language without the official
 bindings. The message *contents* (params and results) are described by the
-JSON Schemas in [`schema/protocol/`](../schema/protocol), and
-[`fixtures/`](../fixtures) has an encoded example of each.
+JSON Schemas in [`schema/protocol/`](../schema/protocol), the document tree
+by [`schema/doctree/document.json`](../schema/doctree/document.json), and
+[`fixtures/`](../fixtures) has an encoded example of each (MessagePack, with
+a JSON twin), for testing a decoder.
+
+A plugin is a program that answers requests for one or more build phases:
+it **parses** source files into document trees, **transforms** trees, or
+**renders** them to output files. The host discovers files, runs the
+phases in order, and writes the output.
+
+## Versions
+
+The protocol version is `MAJOR.MINOR`, with `-rc.N` appended for a release
+candidate (`1.0-rc.0`). The host and the plugin each state theirs in the
+handshake; the host ends the session if they are not compatible:
+
+- Two release versions are compatible if their major versions are equal.
+- A release candidate is compatible only with the very same version.
+  Anything may change between candidates; plugins built against one are
+  rebuilt for the next and for the release.
+
+Within a major version, changes only add things older peers can ignore:
+
+- new optional fields (receivers ignore fields they do not know, and treat
+  a missing optional field as absent);
+- new optional capability fields, and new methods or notifications that are
+  only sent to a peer that announced support for them;
+- new diagnostic codes, new log levels' meanings within the existing set.
+
+These need a new major version: removing or renaming a method or field,
+changing a field's type or meaning, making an optional field required,
+and adding a node kind to the document tree (older plugins would fail to
+decode it; plugin-specific content uses `custom` nodes instead).
+
+The schemas and fixtures in this repository describe the version stated
+above.
+
+## Running a plugin
+
+A site's `lsdocs.toml` lists its plugins in order:
+
+```toml
+[[plugins]]
+name = "mermaid"                     # used in logs and diagnostics
+command = ["./bin/mermaid-plugin"]   # program and arguments
+transport = "stdio"                  # or "pipe"; default "stdio"
+files = ["diagrams/**"]              # optional: source globs it handles
+options = { theme = "dark" }         # optional: passed in `initialize`
+```
+
+`command` may be replaced by `runtime = "python"` with `module` (run as
+`python -m <module>`; the interpreter is `LSDOCS_PYTHON` if set) or
+`runtime = "node"` with `entry` (run as `node <entry>`; `LSDOCS_NODE` if
+set). First-party plugins use `builtin = "<name>"` and run inside the host.
+
+The host starts the program with the site's directory (where `lsdocs.toml`
+is) as its working directory. The plugin's stderr is passed through to the
+user, so it is the place for stray output. The plugin has 30 seconds to
+answer `initialize`, and 5 seconds to exit after `exit` before it is
+killed.
 
 ## Transports
 
@@ -16,8 +75,6 @@ A plugin talks to the host over one of:
 |---|---|
 | `stdio` (default) | The host launches the plugin and uses its stdin and stdout. |
 | `pipe` | The host creates a named pipe (Windows) or unix socket and launches the plugin with its name in the `LSDOCS_PIPE` environment variable. The plugin connects to it. |
-
-First-party plugins may also run in-process, which has no wire format.
 
 **With `stdio`, stdout belongs to the protocol.** Anything else written to
 stdout corrupts the stream and ends the connection. Plugins must send logs
@@ -59,7 +116,8 @@ Messages follow [msgpack-rpc](https://github.com/msgpack-rpc/msgpack-rpc/blob/ma
   and `result` = nil on failure. A method with no result returns nil.
 
 Either side may send requests and notifications at any time after the
-handshake. Responses may arrive in any order.
+handshake. Responses may arrive in any order: the host sends a plugin up
+to its `max_concurrency` requests at once (by default, one per CPU).
 
 ### Encoding rules
 
@@ -72,6 +130,81 @@ without breaking older peers:
   optional field as absent and **ignore unknown fields**.
 - Enums without data are strings (`"warning"`). Document nodes are maps with
   a `"type"` field naming the node kind.
+- Binary data (render output, extra files) is MessagePack `bin`.
+- MessagePack extension types are not used.
+
+## Methods
+
+Params and results are in `schema/protocol/<name>.params.json` and
+`<name>.result.json`, where `<name>` is the method with `/` replaced by `.`
+(`transform/collect` is `transform.collect`).
+
+| Method | Kind | Direction | Params | Result |
+|---|---|---|---|---|
+| `initialize` | request | host -> plugin | `initialize.params` | `initialize.result` |
+| `initialized` | notification | host -> plugin | none | |
+| `parse` | request | host -> plugin | `parse.params` | `parse.result` |
+| `transform/collect` | request | host -> plugin | `transform.collect.params` | `transform.collect.result` |
+| `transform/collected` | request | host -> plugin | `transform.collected.params` | nil |
+| `transform/apply` | request | host -> plugin | `transform.apply.params` | `transform.apply.result` |
+| `render` | request | host -> plugin | `render.params` | `render.result` |
+| `render/site` | request | host -> plugin | `render.site.params` | `render.site.result` |
+| `shutdown` | request | host -> plugin | none | nil |
+| `exit` | notification | host -> plugin | none | |
+| `$/cancel` | notification | either | `cancel.params` | |
+| `log` | notification | plugin -> host | `log.params` | |
+| `progress` | notification | plugin -> host | `progress.params` | |
+| `diagnostics` | notification | plugin -> host | `diagnostics.params` | |
+
+A plugin answers a request it does not handle with error -32601.
+
+### Capabilities
+
+The `initialize` result says which phases the plugin takes part in. A
+phase the plugin does not support is omitted:
+
+| Capability | Fields | Meaning |
+|---|---|---|
+| `parse` | `extensions` | File extensions (without the dot) the plugin parses. The first parser in config order that takes a file's extension (and whose `files` globs match) parses it. Files no parser takes are copied to the output. |
+| `transform` | `nodes`, `collect` | `nodes`: node kinds (`"heading"`, `"custom:mermaid"`) the plugin looks at; it is only sent documents containing one, or every document if empty. `collect`: whether it takes part in the collect pass. |
+| `render` | `formats`, `site` | Output formats (`"html"`). The first renderer renders every document in its first format. `site`: whether it wants `render/site`. |
+| `max_concurrency` | | Most requests it handles at once. |
+| `cache` | | See [Caching](#caching). |
+
+## Lifecycle
+
+1. Host -> plugin request `initialize`, with the host's protocol version,
+   the site (title, base URL, the site and source directories, every source
+   file) and the plugin's `options`. The plugin answers with its protocol
+   version, name, version and capabilities. The host ends the connection
+   if the versions are not compatible.
+2. Host -> plugin notification `initialized`.
+3. The build, one phase at a time:
+   1. `parse` for each file the plugin parses: its path (relative to the
+      source directory, `/` separators) and text. The result is the
+      document and any diagnostics.
+   2. The host then normalizes every document (see
+      [Document shape](#document-shape)).
+   3. Transformers run one at a time, in config order. For a plugin that
+      collects: `transform/collect` for each document it is sent, then once
+      `transform/collected` with everything collected (a map from document
+      source to the collected data). Then `transform/apply` for each
+      document, which returns the document, changed or not; its
+      `collected` field is null over the wire (the official SDKs fill it
+      in from `transform/collected`).
+   4. `render` for each document, then, once after every document is
+      rendered, `render/site` if the render capability has `site: true`. Its
+      result lists extra files, such as a sitemap.
+
+   The plugin may send `log`, `progress` and `diagnostics` notifications at
+   any time.
+4. Host -> plugin request `shutdown`, then notification `exit`. The plugin
+   exits; closing the stream also ends the session.
+
+A host may keep a session open across several builds (`lsdocs serve`
+does): phase requests then repeat after the first build, without a new
+`initialize`. When source files are added or removed, the host restarts
+the plugins, since `initialize` lists the files.
 
 ## Document shape
 
@@ -105,10 +238,25 @@ transformer or renderer works with any parser:
 - A `link` to something in the site may carry a `target`: `document`
   (source path) and/or `anchor`, or an unresolved `label`. Renderers use the
   target, not the `url`, to build the output link.
-- Binary data (e.g. render output) is MessagePack `bin`.
-- MessagePack extension types are not used.
+- `span`s are byte offsets into the document's source text, `end`
+  exclusive.
 
-### Errors
+## Diagnostics
+
+Results and the `diagnostics` notification carry diagnostics: a
+`severity`, a `message`, and optionally the `source` file, a `span` in it
+and a short `code` (`"broken-link"`). Severities:
+
+| Severity | Meaning |
+|---|---|
+| `error` | The build fails (after finishing, so every problem is reported). |
+| `warning` | Probably a mistake; the build continues. |
+| `info`, `hint` | Worth knowing. |
+
+A request that fails outright answers with an error instead (below); the
+build stops with that error.
+
+## Errors
 
 ```
 {"code": <i32>, "message": <string>, "data": <any, optional>}
@@ -130,23 +278,6 @@ Either side may cancel a request it sent with the notification
 and answers the request with error -32800. A response may still arrive if the
 work finished first; the canceller ignores it.
 
-## Lifecycle
-
-1. Host -> plugin request `initialize`. The plugin answers with its protocol
-   version, name and capabilities. The host ends the connection if the
-   protocol versions differ.
-2. Host -> plugin notification `initialized`.
-3. Phase requests the plugin's capabilities allow: `parse`,
-   `transform/collect`, then once `transform/collected` (everything the
-   plugin collected; the `transform/apply` requests that follow leave
-   `collected` null), `transform/apply`, `render`, and, once after every
-   document is rendered, `render/site` (if the render capability has
-   `site: true`), whose result lists extra files such as a sitemap. The
-   plugin may send `log`, `progress` and `diagnostics` notifications at any
-   time.
-4. Host -> plugin request `shutdown`, then notification `exit`. The plugin
-   exits; closing the stream also ends the session.
-
 ## Caching
 
 A plugin whose results depend only on the request, the site settings and
@@ -157,9 +288,30 @@ earlier result for the same inputs instead of sending the request. A plugin
 without `cache` is never cached. Diagnostics in a cached result are
 reported again; notifications sent while producing it are not.
 
-## Example
+## Example session
 
-The notification `initialized` (no params) is the 3-element array
+A parser plugin's session, with MessagePack values written as JSON (the
+`initialize` params are shortened):
+
+```
+host -> [0, 0, "initialize", [{"protocol_version": "1.0-rc.0",
+          "host": {"name": "lsdocs", "version": "0.1.0"},
+          "site": {"root": "/home/me/site", "files": ["index.txt"]},
+          "options": null}]]
+plugin -> [1, 0, null, {"protocol_version": "1.0-rc.0",
+          "plugin": {"name": "parser-txt", "version": "1.0.0"},
+          "capabilities": {"parse": {"extensions": ["txt"]}, "cache": ""}}]
+host -> [2, "initialized", []]
+host -> [0, 1, "parse", [{"source": "index.txt", "text": "Hello.\n"}]]
+plugin -> [1, 1, null, {"document": {"source": "index.txt", "children": [
+          {"type": "paragraph", "span": {"start": 0, "end": 6},
+           "children": [{"type": "text", "value": "Hello."}]}]}}]
+host -> [0, 2, "shutdown", []]
+plugin -> [1, 2, null, null]
+host -> [2, "exit", []]
+```
+
+The notification `initialized` is the 3-element array
 `[2, "initialized", []]`, which is 15 bytes of MessagePack:
 
 ```

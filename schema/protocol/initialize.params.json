@@ -13,10 +13,8 @@
       "default": null
     },
     "protocol_version": {
-      "description": "Protocol version the host speaks.",
-      "type": "integer",
-      "format": "uint32",
-      "minimum": 0
+      "description": "Protocol version the host speaks, e.g. `\"1.0\"`.",
+      "type": "string"
     },
     "site": {
       "description": "The site being built.",
