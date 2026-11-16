@@ -559,6 +559,7 @@ pub mod msgpack {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::unwrap_used)]
     #[test]
     fn versions_are_compatible_within_a_major_version() {
         use super::compatible;

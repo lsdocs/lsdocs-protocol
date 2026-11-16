@@ -40,9 +40,26 @@ pub fn workspace_root() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../..")
 }
 
+/// The files generated so far, and what failed to generate.
+#[derive(Default)]
+struct Outputs {
+    files: Vec<Output>,
+    errors: Vec<String>,
+}
+
+impl Outputs {
+    fn push(&mut self, path: impl Into<String>, bytes: Result<Vec<u8>, String>) {
+        let path = path.into();
+        match bytes {
+            Ok(bytes) => self.files.push(Output { path, bytes }),
+            Err(e) => self.errors.push(format!("{path}: {e}")),
+        }
+    }
+}
+
 /// Every generated file.
-pub fn outputs() -> Vec<Output> {
-    let mut out = Vec::new();
+pub fn outputs() -> io::Result<Vec<Output>> {
+    let mut out = Outputs::default();
 
     schema::<Document>(&mut out, "schema/doctree/document.json");
     schema::<ConfigFile>(&mut out, "schema/config/lsdocs.toml.json");
@@ -64,27 +81,34 @@ pub fn outputs() -> Vec<Output> {
     notification::<notification::Progress>(&mut out, ex.progress);
     notification::<notification::Diagnostics>(&mut out, ex.diagnostics);
 
-    out
+    if out.errors.is_empty() {
+        Ok(out.files)
+    } else {
+        Err(io::Error::other(out.errors.join("\n")))
+    }
 }
 
 /// Writes every output and deletes stale files in the managed directories.
-pub fn write(root: &Path) -> io::Result<()> {
-    let outputs = outputs();
+/// Returns how many files were written.
+pub fn write(root: &Path) -> io::Result<usize> {
+    let outputs = outputs()?;
     for output in &outputs {
         let path = root.join(&output.path);
-        fs::create_dir_all(path.parent().expect("outputs live in a directory"))?;
+        if let Some(dir) = path.parent() {
+            fs::create_dir_all(dir)?;
+        }
         fs::write(path, &output.bytes)?;
     }
     for extra in extra_files(root, &outputs)? {
         fs::remove_file(root.join(extra))?;
     }
-    Ok(())
+    Ok(outputs.len())
 }
 
 /// Paths (relative to `root`) of generated files that are missing, differ,
 /// or should no longer exist.
 pub fn stale(root: &Path) -> io::Result<Vec<String>> {
-    let outputs = outputs();
+    let outputs = outputs()?;
     let mut stale = Vec::new();
     for output in &outputs {
         match fs::read(root.join(&output.path)) {
@@ -103,11 +127,8 @@ fn extra_files(root: &Path, outputs: &[Output]) -> io::Result<Vec<String>> {
     let mut extra = Vec::new();
     for dir in MANAGED_DIRS {
         for path in walk(&root.join(dir))? {
-            let rel = path
-                .strip_prefix(root)
-                .expect("walked under root")
-                .to_string_lossy()
-                .replace('\\', "/");
+            let rel = path.strip_prefix(root).unwrap_or(&path);
+            let rel = rel.to_string_lossy().replace('\\', "/");
             if !expected.contains(rel.as_str()) {
                 extra.push(rel);
             }
@@ -140,51 +161,47 @@ fn stem(method: &str) -> String {
     method.trim_start_matches("$/").replace('/', ".")
 }
 
-fn pretty_json<T: Serialize + ?Sized>(value: &T) -> Vec<u8> {
-    let mut bytes = serde_json::to_vec_pretty(value).expect("serializable");
+fn pretty_json<T: Serialize + ?Sized>(value: &T) -> Result<Vec<u8>, String> {
+    let mut bytes = serde_json::to_vec_pretty(value).map_err(|e| e.to_string())?;
     bytes.push(b'\n');
-    bytes
+    Ok(bytes)
 }
 
-fn schema<T: JsonSchema>(out: &mut Vec<Output>, path: &str) {
-    out.push(Output {
-        path: path.into(),
-        bytes: pretty_json(&schemars::schema_for!(T)),
-    });
+fn schema<T: JsonSchema>(out: &mut Outputs, path: &str) {
+    out.push(path, pretty_json(&schemars::schema_for!(T)));
 }
 
 /// Adds `<base>.msgpack` and `<base>.json` for `value`, after checking the
 /// MessagePack decodes back to the same value.
-fn fixture<T>(out: &mut Vec<Output>, base: &str, value: &T)
+fn fixture<T>(out: &mut Outputs, base: &str, value: &T)
 where
     T: Serialize + DeserializeOwned + PartialEq + Debug,
 {
-    let bytes = msgpack::encode(value).expect("encodable");
-    let decoded: T = msgpack::decode(&bytes).expect("decodable");
-    assert_eq!(&decoded, value, "{base} does not round-trip");
-    out.push(Output {
-        path: format!("{base}.msgpack"),
-        bytes,
-    });
-    out.push(Output {
-        path: format!("{base}.json"),
-        bytes: pretty_json(value),
-    });
+    let round_trip = || {
+        let bytes = msgpack::encode(value).map_err(|e| e.to_string())?;
+        let decoded: T = msgpack::decode(&bytes).map_err(|e| e.to_string())?;
+        if &decoded != value {
+            return Err(format!("does not round-trip: {decoded:?}"));
+        }
+        Ok(bytes)
+    };
+    out.push(format!("{base}.msgpack"), round_trip());
+    out.push(format!("{base}.json"), pretty_json(value));
 }
 
 /// Schema and fixture for a message part, skipped when it is `()`.
-fn part<T>(out: &mut Vec<Output>, base: &str, value: &T)
+fn part<T>(out: &mut Outputs, base: &str, value: &T)
 where
     T: Serialize + DeserializeOwned + PartialEq + Debug + JsonSchema,
 {
-    if serde_json::to_value(value).expect("serializable").is_null() {
+    if serde_json::to_value(value).is_ok_and(|v| v.is_null()) {
         return;
     }
     schema::<T>(out, &format!("schema/protocol/{base}.json"));
     fixture(out, &format!("fixtures/protocol/{base}"), value);
 }
 
-fn request<R>(out: &mut Vec<Output>, params: R::Params, result: R::Result)
+fn request<R>(out: &mut Outputs, params: R::Params, result: R::Result)
 where
     R: Request,
     R::Params: PartialEq + Debug + JsonSchema,
@@ -195,7 +212,7 @@ where
     part(out, &format!("{stem}.result"), &result);
 }
 
-fn notification<N>(out: &mut Vec<Output>, params: N::Params)
+fn notification<N>(out: &mut Outputs, params: N::Params)
 where
     N: Notification,
     N::Params: PartialEq + Debug + JsonSchema,
@@ -205,6 +222,7 @@ where
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::unwrap_used)]
     use super::*;
 
     #[test]

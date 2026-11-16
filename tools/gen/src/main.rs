@@ -27,8 +27,8 @@ fn main() -> ExitCode {
         }
     } else {
         match lsdocs_gen::write(&root) {
-            Ok(()) => {
-                println!("wrote {} files", lsdocs_gen::outputs().len());
+            Ok(written) => {
+                println!("wrote {written} files");
                 ExitCode::SUCCESS
             }
             Err(e) => {

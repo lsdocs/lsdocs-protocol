@@ -438,6 +438,7 @@ impl std::error::Error for ConfigError {}
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::unwrap_used, clippy::panic)]
     use super::*;
     use serde_json::json;
 
