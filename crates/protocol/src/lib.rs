@@ -239,6 +239,152 @@ pub struct Capabilities {
     /// cache.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub cache: Option<String>,
+    /// Directives and roles the plugin handles. The host passes every
+    /// plugin's syntax to parsers ([`ParseParams::syntax`]), which turn it
+    /// into `custom` nodes for the plugin to transform.
+    #[serde(default, skip_serializing_if = "Syntax::is_empty")]
+    pub syntax: Syntax,
+}
+
+/// Syntax extensions: directives and roles that plugins give meaning to.
+///
+/// Parsers read them with their format's syntax (in reStructuredText,
+/// `.. name:: argument` and `` :name:`text` ``; in Markdown, MyST's
+/// ```` ```{name} argument ```` fences and `` {name}`text` ``) and make
+/// format-neutral nodes of them; see "Syntax extensions" in
+/// `spec/wire.md` for the shape.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct Syntax {
+    /// Block-level directives.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub directives: Vec<DirectiveSyntax>,
+    /// Inline roles.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub roles: Vec<RoleSyntax>,
+}
+
+impl Syntax {
+    /// Whether there are neither directives nor roles.
+    pub fn is_empty(&self) -> bool {
+        self.directives.is_empty() && self.roles.is_empty()
+    }
+
+    /// Adds `other`'s directives and roles, keeping the first declaration
+    /// of a name.
+    pub fn merge(&mut self, other: &Syntax) {
+        for d in &other.directives {
+            if !self.directives.iter().any(|x| x.name == d.name) {
+                self.directives.push(d.clone());
+            }
+        }
+        for r in &other.roles {
+            if !self.roles.iter().any(|x| x.name == r.name) {
+                self.roles.push(r.clone());
+            }
+        }
+    }
+
+    /// The directive called `name`, if declared.
+    pub fn directive(&self, name: &str) -> Option<&DirectiveSyntax> {
+        self.directives.iter().find(|d| d.name == name)
+    }
+
+    /// Whether a role called `name` is declared.
+    pub fn has_role(&self, name: &str) -> bool {
+        self.roles.iter().any(|r| r.name == name)
+    }
+}
+
+/// A directive: what it accepts, so parsers can split its parts.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct DirectiveSyntax {
+    /// The directive's name, in lower case, e.g. `"versionadded"`.
+    pub name: String,
+    /// How many arguments it requires.
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub required_arguments: u32,
+    /// How many more arguments it accepts.
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub optional_arguments: u32,
+    /// Whether the last argument may contain whitespace (it takes the rest
+    /// of the argument text).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub final_argument_whitespace: bool,
+    /// How the argument is read.
+    #[serde(default, skip_serializing_if = "ArgumentSyntax::is_text")]
+    pub argument: ArgumentSyntax,
+    /// The options it accepts, by name.
+    #[serde(default, skip_serializing_if = "std::collections::BTreeMap::is_empty")]
+    pub options: std::collections::BTreeMap<String, OptionSyntax>,
+    /// What its content is.
+    #[serde(default, skip_serializing_if = "ContentSyntax::is_none")]
+    pub content: ContentSyntax,
+}
+
+/// How a directive's argument is read.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "snake_case")]
+pub enum ArgumentSyntax {
+    /// Plain text, kept as written.
+    #[default]
+    Text,
+    /// Inline markup, parsed as well as kept as text.
+    Inline,
+}
+
+impl ArgumentSyntax {
+    fn is_text(&self) -> bool {
+        *self == Self::Text
+    }
+}
+
+/// What a directive option takes.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "snake_case")]
+pub enum OptionSyntax {
+    /// No value.
+    Flag,
+    /// A value, which may be empty.
+    #[default]
+    Value,
+    /// A value that must not be empty.
+    Required,
+}
+
+/// What a directive's content is.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "snake_case")]
+pub enum ContentSyntax {
+    /// The directive takes no content.
+    #[default]
+    None,
+    /// Block markup, parsed into the node's children.
+    Blocks,
+    /// Text kept as written (code, a list of document names, ...).
+    Text,
+}
+
+impl ContentSyntax {
+    fn is_none(&self) -> bool {
+        *self == Self::None
+    }
+}
+
+/// A role: inline text with a name, e.g. `` :kbd:`Ctrl+C` ``.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct RoleSyntax {
+    /// The role's name, in lower case, e.g. `"kbd"`.
+    pub name: String,
+}
+
+fn is_zero(value: &u32) -> bool {
+    *value == 0
 }
 
 /// Parsing capability.
@@ -292,6 +438,10 @@ pub struct ParseParams {
     pub source: String,
     /// The file's text.
     pub text: String,
+    /// The directives and roles plugins declared ([`Capabilities::syntax`]),
+    /// for parsers that support syntax extensions.
+    #[serde(default, skip_serializing_if = "Syntax::is_empty")]
+    pub syntax: Syntax,
 }
 
 /// Result of [`request::Parse`].

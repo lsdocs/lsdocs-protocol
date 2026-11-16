@@ -11,11 +11,13 @@ use lsdocs_doctree::{
     Math, Paragraph, Raw, Section, Span, Strong, Table, TableCell, TableRow, ThematicBreak, text,
 };
 use lsdocs_protocol::{
-    CancelParams, Capabilities, Diagnostic, DiagnosticsParams, InitializeParams, InitializeResult,
-    LogLevel, LogParams, OutputFile, PROTOCOL_VERSION, ParseCapability, ParseParams, ParseResult,
-    ProgramInfo, ProgressParams, RenderCapability, RenderParams, RenderResult, RenderSiteParams,
-    RenderSiteResult, RenderedPage, Severity, SiteInfo, TransformApplyParams, TransformApplyResult,
-    TransformCapability, TransformCollectParams, TransformCollectResult, TransformCollectedParams,
+    ArgumentSyntax, CancelParams, Capabilities, ContentSyntax, Diagnostic, DiagnosticsParams,
+    DirectiveSyntax, InitializeParams, InitializeResult, LogLevel, LogParams, OptionSyntax,
+    OutputFile, PROTOCOL_VERSION, ParseCapability, ParseParams, ParseResult, ProgramInfo,
+    ProgressParams, RenderCapability, RenderParams, RenderResult, RenderSiteParams,
+    RenderSiteResult, RenderedPage, RoleSyntax, Severity, SiteInfo, Syntax, TransformApplyParams,
+    TransformApplyResult, TransformCapability, TransformCollectParams, TransformCollectResult,
+    TransformCollectedParams,
 };
 use serde_json::json;
 
@@ -314,11 +316,13 @@ impl Messages {
                     }),
                     max_concurrency: Some(1),
                     cache: Some("template:3f9a2c".into()),
+                    syntax: example_syntax(),
                 },
             },
             parse_params: ParseParams {
                 source: doc.source.clone(),
                 text: "# Getting started\n\nInstall `lsdocs`, ...\n".into(),
+                syntax: example_syntax(),
             },
             parse_result: ParseResult {
                 document: doc.clone(),
@@ -394,5 +398,21 @@ impl Messages {
                 ],
             },
         }
+    }
+}
+
+/// A directive and a role, as a plugin declares them and parsers get them.
+fn example_syntax() -> Syntax {
+    Syntax {
+        directives: vec![DirectiveSyntax {
+            name: "versionadded".into(),
+            required_arguments: 1,
+            final_argument_whitespace: true,
+            argument: ArgumentSyntax::Text,
+            options: [("class".to_owned(), OptionSyntax::Value)].into(),
+            content: ContentSyntax::Blocks,
+            ..DirectiveSyntax::default()
+        }],
+        roles: vec![RoleSyntax { name: "kbd".into() }],
     }
 }

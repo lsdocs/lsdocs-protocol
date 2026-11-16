@@ -25,6 +25,24 @@
       "site": true
     },
     "max_concurrency": 1,
-    "cache": "template:3f9a2c"
+    "cache": "template:3f9a2c",
+    "syntax": {
+      "directives": [
+        {
+          "name": "versionadded",
+          "required_arguments": 1,
+          "final_argument_whitespace": true,
+          "options": {
+            "class": "value"
+          },
+          "content": "blocks"
+        }
+      ],
+      "roles": [
+        {
+          "name": "kbd"
+        }
+      ]
+    }
   }
 }

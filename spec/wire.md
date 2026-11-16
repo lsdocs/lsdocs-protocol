@@ -170,6 +170,7 @@ phase the plugin does not support is omitted:
 | `render` | `formats`, `site` | Output formats (`"html"`). The first renderer renders every document in its first format. `site`: whether it wants `render/site`. |
 | `max_concurrency` | | Most requests it handles at once. |
 | `cache` | | See [Caching](#caching). |
+| `syntax` | `directives`, `roles` | Directives and roles the plugin gives meaning to; see [Syntax extensions](#syntax-extensions). |
 
 ## Lifecycle
 
@@ -181,8 +182,8 @@ phase the plugin does not support is omitted:
 2. Host -> plugin notification `initialized`.
 3. The build, one phase at a time:
    1. `parse` for each file the plugin parses: its path (relative to the
-      source directory, `/` separators) and text. The result is the
-      document and any diagnostics.
+      source directory, `/` separators), its text, and the `syntax` every
+      plugin declared. The result is the document and any diagnostics.
    2. The host then normalizes every document (see
       [Document shape](#document-shape)).
    3. Transformers run one at a time, in config order. For a plugin that
@@ -240,6 +241,59 @@ transformer or renderer works with any parser:
   target, not the `url`, to build the output link.
 - `span`s are byte offsets into the document's source text, `end`
   exclusive.
+
+## Syntax extensions
+
+Directives and roles (Sphinx's `versionadded`, `ref`, ...) are syntax:
+only a parser can find them. Their meaning belongs to a transformer. A
+plugin declares the ones it handles in its `syntax` capability; the host
+merges every plugin's declarations (the first plugin in config order wins
+a name) and sends them to parsers in each `parse` request's `syntax`
+field. A parser that supports syntax extensions reads them with its
+format's syntax and makes the nodes below, which the declaring plugin
+transforms. A parser that does not ignores the field.
+
+A directive declaration (`schema/protocol/initialize.result.json`):
+
+| Field | Default | Meaning |
+|---|---|---|
+| `name` | | Lower case, e.g. `"versionadded"`. |
+| `required_arguments`, `optional_arguments` | 0 | How many arguments it takes. |
+| `final_argument_whitespace` | false | Whether the last argument takes the rest of the text, spaces included. |
+| `argument` | `"text"` | `"inline"`: the argument is also parsed as inline markup. |
+| `options` | `{}` | Option names: `"flag"` (no value), `"value"` (may be empty) or `"required"` (a value). |
+| `content` | `"none"` | `"blocks"`: parsed as block markup; `"text"`: kept as written (code, a list of names). |
+
+A role declaration has only a `name`.
+
+What parsers make:
+
+- A directive is a `custom` node whose `kind` is its name, with the
+  attributes `argument` (the arguments as one string, if any), `options`
+  (a map from name to value: `true` for a flag, else the text) and, for
+  text content, `content` (the text, without the trailing newline). Its
+  children are its parsed content; for an inline argument, the first child
+  is a `custom` node of kind `directive_argument` holding the parsed
+  argument. Problems (an unknown option, a missing argument, content where
+  none is allowed) are warnings; the reStructuredText parser reports them
+  as docutils does.
+- A role is a `custom` node of kind `role` with the attributes `name` and
+  `text` (backslash escapes removed), and the text as its one `text`
+  child, so plain-text views of it (titles, ids) are right.
+
+The syntax per format: in reStructuredText, `.. name:: argument`, option
+field lines and indented content, and `` :name:`text` ``. In Markdown,
+MyST's: a fenced block whose info string starts with `{name}` (the rest is
+the argument; leading `:name: value` lines or a `---` YAML block are
+options; the rest is content), and `` {name}`text` ``.
+
+A directive nobody declared stays a `custom` node of its name with
+`argument`, `options` and `content` as text, for a transformer to find.
+
+Renderers draw a `custom` node they don't know as a container of its
+children; a `custom` node with the attribute `inline: true` is inline
+(`render-html` uses a `span`, or the element named by `html_tag`, with
+`title` as its title).
 
 ## Diagnostics
 

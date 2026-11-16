@@ -1,4 +1,22 @@
 {
   "source": "guide/getting-started.md",
-  "text": "# Getting started\n\nInstall `lsdocs`, ...\n"
+  "text": "# Getting started\n\nInstall `lsdocs`, ...\n",
+  "syntax": {
+    "directives": [
+      {
+        "name": "versionadded",
+        "required_arguments": 1,
+        "final_argument_whitespace": true,
+        "options": {
+          "class": "value"
+        },
+        "content": "blocks"
+      }
+    ],
+    "roles": [
+      {
+        "name": "kbd"
+      }
+    ]
+  }
 }

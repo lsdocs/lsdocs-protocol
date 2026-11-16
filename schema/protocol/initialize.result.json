@@ -23,6 +23,21 @@
     "capabilities"
   ],
   "$defs": {
+    "ArgumentSyntax": {
+      "description": "How a directive's argument is read.",
+      "oneOf": [
+        {
+          "description": "Plain text, kept as written.",
+          "type": "string",
+          "const": "text"
+        },
+        {
+          "description": "Inline markup, parsed as well as kept as text.",
+          "type": "string",
+          "const": "inline"
+        }
+      ]
+    },
     "Capabilities": {
       "description": "What a plugin can do. A phase the plugin does not support is omitted.",
       "type": "object",
@@ -65,6 +80,10 @@
             }
           ]
         },
+        "syntax": {
+          "description": "Directives and roles the plugin handles. The host passes every\nplugin's syntax to parsers ([`ParseParams::syntax`]), which turn it\ninto `custom` nodes for the plugin to transform.",
+          "$ref": "#/$defs/Syntax"
+        },
         "transform": {
           "description": "Present if the plugin handles the transform requests.",
           "anyOf": [
@@ -77,6 +96,90 @@
           ]
         }
       }
+    },
+    "ContentSyntax": {
+      "description": "What a directive's content is.",
+      "oneOf": [
+        {
+          "description": "The directive takes no content.",
+          "type": "string",
+          "const": "none"
+        },
+        {
+          "description": "Block markup, parsed into the node's children.",
+          "type": "string",
+          "const": "blocks"
+        },
+        {
+          "description": "Text kept as written (code, a list of document names, ...).",
+          "type": "string",
+          "const": "text"
+        }
+      ]
+    },
+    "DirectiveSyntax": {
+      "description": "A directive: what it accepts, so parsers can split its parts.",
+      "type": "object",
+      "properties": {
+        "argument": {
+          "description": "How the argument is read.",
+          "$ref": "#/$defs/ArgumentSyntax"
+        },
+        "content": {
+          "description": "What its content is.",
+          "$ref": "#/$defs/ContentSyntax"
+        },
+        "final_argument_whitespace": {
+          "description": "Whether the last argument may contain whitespace (it takes the rest\nof the argument text).",
+          "type": "boolean"
+        },
+        "name": {
+          "description": "The directive's name, in lower case, e.g. `\"versionadded\"`.",
+          "type": "string"
+        },
+        "optional_arguments": {
+          "description": "How many more arguments it accepts.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "options": {
+          "description": "The options it accepts, by name.",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/OptionSyntax"
+          }
+        },
+        "required_arguments": {
+          "description": "How many arguments it requires.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "OptionSyntax": {
+      "description": "What a directive option takes.",
+      "oneOf": [
+        {
+          "description": "No value.",
+          "type": "string",
+          "const": "flag"
+        },
+        {
+          "description": "A value, which may be empty.",
+          "type": "string",
+          "const": "value"
+        },
+        {
+          "description": "A value that must not be empty.",
+          "type": "string",
+          "const": "required"
+        }
+      ]
     },
     "ParseCapability": {
       "description": "Parsing capability.",
@@ -131,6 +234,39 @@
       "required": [
         "formats"
       ]
+    },
+    "RoleSyntax": {
+      "description": "A role: inline text with a name, e.g. `` :kbd:`Ctrl+C` ``.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The role's name, in lower case, e.g. `\"kbd\"`.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "Syntax": {
+      "description": "Syntax extensions: directives and roles that plugins give meaning to.\n\nParsers read them with their format's syntax (in reStructuredText,\n`.. name:: argument` and `` :name:`text` ``; in Markdown, MyST's\n```` ```{name} argument ```` fences and `` {name}`text` ``) and make\nformat-neutral nodes of them; see \"Syntax extensions\" in\n`spec/wire.md` for the shape.",
+      "type": "object",
+      "properties": {
+        "directives": {
+          "description": "Block-level directives.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DirectiveSyntax"
+          }
+        },
+        "roles": {
+          "description": "Inline roles.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RoleSyntax"
+          }
+        }
+      }
     },
     "TransformCapability": {
       "description": "Transform capability.",
