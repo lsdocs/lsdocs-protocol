@@ -98,8 +98,10 @@ pub mod request {
         TransformCollect = "transform/collect", TransformCollectParams => TransformCollectResult;
         /// Host -> plugin. Sent once between the two transform passes, to a
         /// plugin that collects: everything collected from all documents.
-        /// The `transform/apply` requests that follow omit it.
-        TransformCollected = "transform/collected", TransformCollectedParams => ();
+        /// The `transform/apply` requests that follow omit it. The plugin
+        /// may answer with documents it generates from that data (an index
+        /// page, say), which join the site.
+        TransformCollected = "transform/collected", TransformCollectedParams => TransformCollectedResult;
         /// Host -> plugin. Second transform pass: rewrites one document, with
         /// the data collected from all documents.
         TransformApply = "transform/apply", TransformApplyParams => TransformApplyResult;
@@ -483,6 +485,22 @@ pub struct TransformCollectedParams {
     /// document's `source` to its collected `data`.
     #[serde(default)]
     pub collected: Value,
+}
+
+/// Result of [`request::TransformCollected`].
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct TransformCollectedResult {
+    /// Documents the plugin generates, with no source file: each one's
+    /// `source` is a path no source file has (it names the output, as a
+    /// source path would). The host normalizes them, and they go through
+    /// this plugin's apply pass, the transformers after it and rendering
+    /// like any other document.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub documents: Vec<Document>,
+    /// Problems found.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub diagnostics: Vec<Diagnostic>,
 }
 
 /// Parameters of [`request::TransformApply`].

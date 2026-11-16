@@ -17,7 +17,7 @@ use lsdocs_protocol::{
     ProgressParams, RenderCapability, RenderParams, RenderResult, RenderSiteParams,
     RenderSiteResult, RenderedPage, RoleSyntax, Severity, SiteInfo, Syntax, TransformApplyParams,
     TransformApplyResult, TransformCapability, TransformCollectParams, TransformCollectResult,
-    TransformCollectedParams,
+    TransformCollectedParams, TransformCollectedResult,
 };
 use serde_json::json;
 
@@ -258,6 +258,7 @@ pub struct Messages {
     pub collect_params: TransformCollectParams,
     pub collect_result: TransformCollectResult,
     pub collected_params: TransformCollectedParams,
+    pub collected_result: TransformCollectedResult,
     pub apply_params: TransformApplyParams,
     pub apply_result: TransformApplyResult,
     pub render_params: RenderParams,
@@ -340,6 +341,22 @@ impl Messages {
                     "guide/getting-started.md": {"headings": [{"id": "getting-started", "level": 1}]},
                     "index.md": {"headings": []},
                 }),
+            },
+            collected_result: TransformCollectedResult {
+                documents: vec![{
+                    let mut index = Document::new("genindex.md");
+                    index.metadata.insert("nav_exclude".into(), json!(true));
+                    index.children = vec![
+                        Heading {
+                            level: 1,
+                            children: vec![text("Index")],
+                            ..Heading::default()
+                        }
+                        .into(),
+                    ];
+                    index
+                }],
+                diagnostics: vec![],
             },
             apply_params: TransformApplyParams {
                 document: doc.clone(),

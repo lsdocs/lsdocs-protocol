@@ -1,0 +1,22 @@
+{
+  "documents": [
+    {
+      "source": "genindex.md",
+      "metadata": {
+        "nav_exclude": true
+      },
+      "children": [
+        {
+          "type": "heading",
+          "level": 1,
+          "children": [
+            {
+              "type": "text",
+              "value": "Index"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

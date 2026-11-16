@@ -145,7 +145,7 @@ Params and results are in `schema/protocol/<name>.params.json` and
 | `initialized` | notification | host -> plugin | none | |
 | `parse` | request | host -> plugin | `parse.params` | `parse.result` |
 | `transform/collect` | request | host -> plugin | `transform.collect.params` | `transform.collect.result` |
-| `transform/collected` | request | host -> plugin | `transform.collected.params` | nil |
+| `transform/collected` | request | host -> plugin | `transform.collected.params` | `transform.collected.result` |
 | `transform/apply` | request | host -> plugin | `transform.apply.params` | `transform.apply.result` |
 | `render` | request | host -> plugin | `render.params` | `render.result` |
 | `render/site` | request | host -> plugin | `render.site.params` | `render.site.result` |
@@ -189,10 +189,15 @@ phase the plugin does not support is omitted:
    3. Transformers run one at a time, in config order. For a plugin that
       collects: `transform/collect` for each document it is sent, then once
       `transform/collected` with everything collected (a map from document
-      source to the collected data). Then `transform/apply` for each
-      document, which returns the document, changed or not; its
-      `collected` field is null over the wire (the official SDKs fill it
-      in from `transform/collected`).
+      source to the collected data). Its result may hold documents the
+      plugin generates from that data (an index page, say), each with a
+      `source` path no other document has: the host normalizes them and
+      adds them to the site, so they go through the apply pass, the later
+      transformers and rendering like the others. A generated document
+      whose path is taken (or not a safe relative path) is an error. Then
+      `transform/apply` for each document, which returns the document,
+      changed or not; its `collected` field is null over the wire (the
+      official SDKs fill it in from `transform/collected`).
    4. `render` for each document, then, once after every document is
       rendered, `render/site` if the render capability has `site: true`. Its
       result lists extra files, such as a sitemap.
