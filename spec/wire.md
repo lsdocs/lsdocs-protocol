@@ -108,7 +108,7 @@ Messages follow [msgpack-rpc](https://github.com/msgpack-rpc/msgpack-rpc/blob/ma
 - `id` is an unsigned 32-bit integer chosen by the sender of the request,
   unique among that sender's requests still awaiting a response. Each side
   numbers its own requests independently.
-- `method` is a string, e.g. `"parse"` or `"transform/collect"`.
+- `method` is a string, e.g. `"parse"` or `"parse/transform/each"`.
 - `params` is an **array of arguments**, as msgpack-rpc requires. Every
   lsdocs method takes either no argument (`[]`, for methods whose params are
   empty) or exactly one: the params map described by the method's schema.
@@ -137,19 +137,19 @@ without breaking older peers:
 
 Params and results are in `schema/protocol/<name>.params.json` and
 `<name>.result.json`, where `<name>` is the method with `/` replaced by `.`
-(`transform/collect` is `transform.collect`).
+(`parse/transform/each` is `parse.transform.each`).
 
 | Method | Kind | Direction | Params | Result |
 |---|---|---|---|---|
 | `initialize` | request | host -> plugin | `initialize.params` | `initialize.result` |
 | `initialized` | notification | host -> plugin | none | |
 | `parse` | request | host -> plugin | `parse.params` | `parse.result` |
-| `transform/collect` | request | host -> plugin | `transform.collect.params` | `transform.collect.result` |
-| `transform/collected` | request | host -> plugin | `transform.collected.params` | `transform.collected.result` |
-| `transform/apply` | request | host -> plugin | `transform.apply.params` | `transform.apply.result` |
+| `parse/transform/each` | request | host -> plugin | `parse.transform.each.params` | `parse.transform.each.result` |
+| `parse/transform/all` | request | host -> plugin | `parse.transform.all.params` | `parse.transform.all.result` |
+| `render/transform/each` | request | host -> plugin | `render.transform.each.params` | `render.transform.each.result` |
 | `render` | request | host -> plugin | `render.params` | `render.result` |
-| `render/site` | request | host -> plugin | `render.site.params` | `render.site.result` |
-| `site/parse` | request | plugin -> host | `site.parse.params` | `site.parse.result` |
+| `render/transform/all` | request | host -> plugin | `render.transform.all.params` | `render.transform.all.result` |
+| `host/parse` | request | plugin -> host | `host.parse.params` | `host.parse.result` |
 | `shutdown` | request | host -> plugin | none | nil |
 | `exit` | notification | host -> plugin | none | |
 | `$/cancel` | notification | either | `cancel.params` | |
@@ -167,8 +167,8 @@ phase the plugin does not support is omitted:
 | Capability | Fields | Meaning |
 |---|---|---|
 | `parse` | `extensions` | File extensions (without the dot) the plugin parses. The first parser in config order that takes a file's extension (and whose `files` globs match) parses it. Files no parser takes are copied to the output. |
-| `transform` | `nodes`, `collect` | `nodes`: node kinds (`"heading"`, `"custom:mermaid"`) the plugin looks at; it is only sent documents containing one, or every document if empty. `collect`: whether it takes part in the collect pass. |
-| `render` | `formats`, `site` | Output formats (`"html"`). The first renderer renders every document in its first format. `site`: whether it wants `render/site`. |
+| `transform` | `nodes`, `each` | `nodes`: node kinds (`"heading"`, `"custom:mermaid"`) the plugin looks at; it is only sent documents containing one, or every document if empty. `each`: whether it wants `parse/transform/each` and `parse/transform/all`. |
+| `render` | `formats`, `all` | Output formats (`"html"`). The first renderer renders every document in its first format. `all`: whether it wants `render/transform/all`. |
 | `max_concurrency` | | Most requests it handles at once. |
 | `cache` | | See [Caching](#caching). |
 | `syntax` | `directives`, `roles` | Directives and roles the plugin gives meaning to; see [Syntax extensions](#syntax-extensions). |
@@ -188,23 +188,23 @@ phase the plugin does not support is omitted:
    2. The host then normalizes every document (see
       [Document shape](#document-shape)).
    3. Transformers run one at a time, in config order. For a plugin that
-      collects: `transform/collect` for each document it is sent, then once
-      `transform/collected` with everything collected (a map from document
-      source to the collected data). Its result may hold documents the
+      reads (`each`): `parse/transform/each` for each document it is sent, then once
+      `parse/transform/all` with everything read (a map from document
+      source to the data read). Its result may hold documents the
       plugin generates from that data (an index page, say), each with a
       `source` path no other document has: the host normalizes them and
-      adds them to the site, so they go through the apply pass, the later
+      adds them to the site, so they go through `render/transform/each`, the later
       transformers and rendering like the others. A generated document
       whose path is taken (or not a safe relative path) is an error. Then
-      `transform/apply` for each document, which returns the document,
+      `render/transform/each` for each document, which returns the document,
       changed or not; its `collected` field is null over the wire (the
-      official SDKs fill it in from `transform/collected`).
+      official SDKs fill it in from `parse/transform/all`).
    4. `render` for each document, then, once after every document is
-      rendered, `render/site` if the render capability has `site: true`. Its
-      result lists extra files, such as a sitemap.
+      rendered, `render/transform/all` if the render capability has `all: true`. Its
+      result lists files no single page makes, such as a sitemap.
 
    The plugin may send `log`, `progress` and `diagnostics` notifications at
-   any time. While it handles a phase request it may send `site/parse`
+   any time. While it handles a phase request it may send `host/parse`
    requests: the host parses the text with the first parser (in config
    order) taking files of the given `extension`, giving it the site's
    syntax extensions, and answers with that parser's result, not
@@ -354,8 +354,8 @@ earlier result for the same inputs instead of sending the request. A plugin
 without `cache` is never cached. Diagnostics in a cached result are
 reported again; notifications sent while producing it are not.
 
-Results of `parse`, `transform/collect`, `transform/apply` and
-`transform/collected` may list `dependencies`: files they depend on
+Results of `parse`, `parse/transform/each`, `render/transform/each` and
+`parse/transform/all` may list `dependencies`: files they depend on
 besides the request (included files, the source code of generated pages),
 as absolute paths or relative to the site directory. A cached result is
 reused only while each is unchanged (one that was missing must still be

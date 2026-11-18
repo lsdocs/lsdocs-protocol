@@ -74,7 +74,7 @@ pub fn outputs() -> io::Result<Vec<Output>> {
     request::<request::ParseTransformAll>(&mut out, ex.collected_params, ex.collected_result);
     request::<request::Render>(&mut out, ex.render_params, ex.render_result);
     request::<request::HostParse>(&mut out, ex.site_parse_params, ex.site_parse_result);
-    request::<request::RenderTransformAll>(&mut out, ex.render_site_params, ex.render_site_result);
+    request::<request::RenderTransformAll>(&mut out, ex.render_all_params, ex.render_all_result);
     notification::<notification::Initialized>(&mut out, ());
     notification::<notification::Exit>(&mut out, ());
     notification::<notification::Cancel>(&mut out, ex.cancel);

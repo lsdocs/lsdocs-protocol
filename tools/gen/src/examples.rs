@@ -266,8 +266,8 @@ pub struct Messages {
     pub apply_result: RenderTransformEachResult,
     pub render_params: RenderParams,
     pub render_result: RenderResult,
-    pub render_site_params: RenderTransformAllParams,
-    pub render_site_result: RenderTransformAllResult,
+    pub render_all_params: RenderTransformAllParams,
+    pub render_all_result: RenderTransformAllResult,
     pub cancel: CancelParams,
     pub log: LogParams,
     pub progress: ProgressParams,
@@ -407,7 +407,7 @@ impl Messages {
                 extension: "html".into(),
                 diagnostics: vec![],
             },
-            render_site_params: RenderTransformAllParams {
+            render_all_params: RenderTransformAllParams {
                 format: "html".into(),
                 pages: vec![RenderedPage {
                     source: "guide/getting-started.md".into(),
@@ -415,7 +415,7 @@ impl Messages {
                     metadata: BTreeMap::from([("title".into(), json!("Getting started"))]),
                 }],
             },
-            render_site_result: RenderTransformAllResult {
+            render_all_result: RenderTransformAllResult {
                 files: vec![OutputFile {
                     path: "sitemap.xml".into(),
                     output: b"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n".to_vec(),
