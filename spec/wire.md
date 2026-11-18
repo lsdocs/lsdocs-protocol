@@ -351,7 +351,8 @@ work finished first; the canceller ignores it.
 
 A plugin's settings are its own files, under the site's `.config/`
 directory (next to the site config file), in any format; the host does
-not read them, and lays down nothing about what is inside `.config/`.
+not interpret them (it only digests the files a plugin names, below), and
+lays down nothing about what is inside `.config/`.
 `initialize` gives the plugin `config`: `dir`, the absolute path of
 `.config/` (whether or not it exists), and `name`, the plugin's name in
 the site config, so two instances of a plugin can keep separate
