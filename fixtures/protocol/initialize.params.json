@@ -15,7 +15,8 @@
       "index.md"
     ]
   },
-  "options": {
-    "depth": 3
+  "config": {
+    "dir": "/home/me/my-docs/.config",
+    "name": "toc"
   }
 }

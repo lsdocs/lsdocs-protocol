@@ -20,7 +20,7 @@ use std::fmt;
 
 use serde::{Deserialize, Serialize};
 
-/// An arbitrary structured value, used for plugin options.
+/// An arbitrary structured value.
 pub type Value = serde_json::Value;
 
 /// Default for [`Config::source_dir`].
@@ -97,7 +97,9 @@ pub struct PluginEntry {
     pub transport: Option<Transport>,
     /// Glob patterns limiting which source files this plugin handles.
     pub files: Option<Vec<String>>,
-    /// Plugin-specific options, passed to the plugin when it starts.
+    /// No longer supported, and an error: a plugin's settings are its own
+    /// files under `.config/`, next to `lsdocs.toml`. Kept so the error
+    /// can say so.
     pub options: Option<Value>,
 }
 
@@ -156,8 +158,6 @@ pub struct Plugin {
     /// Glob patterns limiting which source files this plugin handles; empty
     /// means no limit beyond the plugin's own capabilities.
     pub files: Vec<String>,
-    /// Plugin-specific options (`null` if none were given).
-    pub options: Value,
 }
 
 /// How a plugin is run.
@@ -340,6 +340,13 @@ fn validate_plugin(entry: PluginEntry, at: &str, problems: &mut Vec<Problem>) ->
         }
     };
 
+    if entry.options.is_some() {
+        problems.push(Problem::new(
+            at,
+            "`options` moved: a plugin's settings are its own files under `.config/`, \
+             next to `lsdocs.toml` (lsdocs' plugins read `.config/lsdocs/<name>/settings.toml`)",
+        ));
+    }
     if problems.len() > start {
         return None;
     }
@@ -347,7 +354,6 @@ fn validate_plugin(entry: PluginEntry, at: &str, problems: &mut Vec<Problem>) ->
         name: entry.name,
         launch: launch?,
         files: entry.files.unwrap_or_default(),
-        options: entry.options.unwrap_or(Value::Null),
     })
 }
 
@@ -440,7 +446,6 @@ impl std::error::Error for ConfigError {}
 mod tests {
     #![allow(clippy::unwrap_used, clippy::panic)]
     use super::*;
-    use serde_json::json;
 
     const FULL: &str = r#"
 [site]
@@ -460,13 +465,23 @@ name = "toc"
 runtime = "python"
 module = "my_toc"
 files = ["guide/**"]
-options = { depth = 3 }
 
 [[plugins]]
 name = "html"
 command = ["render-html", "--pretty"]
 transport = "pipe"
 "#;
+
+    #[test]
+    fn options_key_is_an_error() {
+        let err = Config::from_toml(
+            "[[plugins]]\nname = \"toc\"\nbuiltin = \"transform-toc\"\noptions = { depth = 3 }\n",
+        )
+        .unwrap_err()
+        .to_string();
+        assert!(err.contains("`options` moved"), "{err}");
+        assert!(err.contains(".config/"), "{err}");
+    }
 
     #[test]
     fn full_config_validates() {
@@ -490,7 +505,6 @@ transport = "pipe"
             }
         );
         assert_eq!(config.plugins[1].files, ["guide/**"]);
-        assert_eq!(config.plugins[1].options, json!({"depth": 3}));
         assert_eq!(
             config.plugins[2].launch,
             Launch::External {

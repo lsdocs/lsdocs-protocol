@@ -44,5 +44,8 @@
         }
       ]
     }
-  }
+  },
+  "config_files": [
+    "lsdocs/toc/settings.toml"
+  ]
 }

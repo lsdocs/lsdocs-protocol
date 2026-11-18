@@ -103,7 +103,7 @@
           "type": "string"
         },
         "options": {
-          "description": "Plugin-specific options, passed to the plugin when it starts."
+          "description": "No longer supported, and an error: a plugin's settings are its own\nfiles under `.config/`, next to `lsdocs.toml`. Kept so the error\ncan say so."
         },
         "runtime": {
           "description": "Runtime to launch a script plugin with; needs `module` (Python) or\n`entry` (Node).",

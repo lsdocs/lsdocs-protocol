@@ -4,13 +4,17 @@
   "description": "Parameters of [`request::Initialize`].",
   "type": "object",
   "properties": {
+    "config": {
+      "description": "Where the plugin's settings are.",
+      "$ref": "#/$defs/ConfigInfo",
+      "default": {
+        "dir": "",
+        "name": ""
+      }
+    },
     "host": {
       "description": "The host.",
       "$ref": "#/$defs/ProgramInfo"
-    },
-    "options": {
-      "description": "The plugin's `options` from the site config, or null.",
-      "default": null
     },
     "protocol_version": {
       "description": "Protocol version the host speaks, e.g. `\"1.0\"`.",
@@ -27,6 +31,22 @@
     "host"
   ],
   "$defs": {
+    "ConfigInfo": {
+      "description": "Where a plugin's settings are: the site's `.config/` directory, whose\nlayout is the plugin's business (the recommended one is\n`<vendor>/<name>/`), and the plugin's name in the site config.",
+      "type": "object",
+      "properties": {
+        "dir": {
+          "description": "Absolute path of `.config/` (next to `lsdocs.toml`), whether or\nnot it exists.",
+          "type": "string",
+          "default": ""
+        },
+        "name": {
+          "description": "The plugin's name in the site config (`name = \"...\"`), so that two\ninstances of a plugin can keep separate settings.",
+          "type": "string",
+          "default": ""
+        }
+      }
+    },
     "ProgramInfo": {
       "description": "Name and version of a program taking part in the protocol.",
       "type": "object",
@@ -64,7 +84,7 @@
           }
         },
         "root": {
-          "description": "Absolute path of the site's directory (where `lsdocs.toml` is).\nResolve relative paths from plugin options against this, not the\nprocess's working directory: builtin plugins run inside the host.",
+          "description": "Absolute path of the site's directory (where `lsdocs.toml` is).\nResolve relative paths from plugin settings against this, not the\nprocess's working directory: builtin plugins run inside the host.",
           "type": [
             "string",
             "null"

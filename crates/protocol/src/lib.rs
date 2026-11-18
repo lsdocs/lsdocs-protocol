@@ -177,7 +177,7 @@ pub struct SiteInfo {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub base_url: Option<String>,
     /// Absolute path of the site's directory (where `lsdocs.toml` is).
-    /// Resolve relative paths from plugin options against this, not the
+    /// Resolve relative paths from plugin settings against this, not the
     /// process's working directory: builtin plugins run inside the host.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub root: Option<String>,
@@ -203,9 +203,25 @@ pub struct InitializeParams {
     /// The site being built.
     #[serde(default)]
     pub site: SiteInfo,
-    /// The plugin's `options` from the site config, or null.
+    /// Where the plugin's settings are.
     #[serde(default)]
-    pub options: Value,
+    pub config: ConfigInfo,
+}
+
+/// Where a plugin's settings are: the site's `.config/` directory, whose
+/// layout is the plugin's business (the recommended one is
+/// `<vendor>/<name>/`), and the plugin's name in the site config.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct ConfigInfo {
+    /// Absolute path of `.config/` (next to `lsdocs.toml`), whether or
+    /// not it exists.
+    #[serde(default)]
+    pub dir: String,
+    /// The plugin's name in the site config (`name = "..."`), so that two
+    /// instances of a plugin can keep separate settings.
+    #[serde(default)]
+    pub name: String,
 }
 
 /// Result of [`request::Initialize`].
@@ -219,6 +235,12 @@ pub struct InitializeResult {
     pub plugin: ProgramInfo,
     /// What the plugin can do.
     pub capabilities: Capabilities,
+    /// The files the plugin read its settings from, relative to
+    /// `.config/` (or absolute), including ones it looked for and did not
+    /// find. The host digests them into the plugin's cache keys, so a
+    /// change to one (or creating one) is a change of settings.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub config_files: Vec<String>,
 }
 
 /// What a plugin can do. A phase the plugin does not support is omitted.

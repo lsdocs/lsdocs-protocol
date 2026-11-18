@@ -11,10 +11,10 @@ use lsdocs_doctree::{
     Math, Paragraph, Raw, Section, Span, Strong, Table, TableCell, TableRow, ThematicBreak, text,
 };
 use lsdocs_protocol::{
-    ArgumentSyntax, CancelParams, Capabilities, ContentSyntax, Diagnostic, DiagnosticsParams,
-    DirectiveSyntax, HostParseParams, InitializeParams, InitializeResult, LogLevel, LogParams,
-    OptionSyntax, OutputFile, PROTOCOL_VERSION, ParseCapability, ParseParams, ParseResult,
-    ParseTransformAllParams, ParseTransformAllResult, ParseTransformEachParams,
+    ArgumentSyntax, CancelParams, Capabilities, ConfigInfo, ContentSyntax, Diagnostic,
+    DiagnosticsParams, DirectiveSyntax, HostParseParams, InitializeParams, InitializeResult,
+    LogLevel, LogParams, OptionSyntax, OutputFile, PROTOCOL_VERSION, ParseCapability, ParseParams,
+    ParseResult, ParseTransformAllParams, ParseTransformAllResult, ParseTransformEachParams,
     ParseTransformEachResult, ProgramInfo, ProgressParams, RenderCapability, RenderParams,
     RenderResult, RenderTransformAllParams, RenderTransformAllResult, RenderTransformEachParams,
     RenderTransformEachResult, RenderedPage, RoleSyntax, Severity, SiteInfo, Syntax,
@@ -298,7 +298,10 @@ impl Messages {
                     source_dir: Some("/home/me/my-docs/docs".into()),
                     files: vec!["guide.md".into(), "img/logo.svg".into(), "index.md".into()],
                 },
-                options: json!({"depth": 3}),
+                config: ConfigInfo {
+                    dir: "/home/me/my-docs/.config".into(),
+                    name: "toc".into(),
+                },
             },
             initialize_result: InitializeResult {
                 protocol_version: PROTOCOL_VERSION.into(),
@@ -322,6 +325,7 @@ impl Messages {
                     cache: Some("template:3f9a2c".into()),
                     syntax: example_syntax(),
                 },
+                config_files: vec!["lsdocs/toc/settings.toml".into()],
             },
             parse_params: ParseParams {
                 source: doc.source.clone(),

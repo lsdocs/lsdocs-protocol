@@ -8,6 +8,13 @@
       "description": "What the plugin can do.",
       "$ref": "#/$defs/Capabilities"
     },
+    "config_files": {
+      "description": "The files the plugin read its settings from, relative to\n`.config/` (or absolute), including ones it looked for and did not\nfind. The host digests them into the plugin's cache keys, so a\nchange to one (or creating one) is a change of settings.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "plugin": {
       "description": "The plugin.",
       "$ref": "#/$defs/ProgramInfo"
