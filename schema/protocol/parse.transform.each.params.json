@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "TransformCollectParams",
-  "description": "Parameters of [`request::TransformCollect`].",
+  "title": "ParseTransformEachParams",
+  "description": "Parameters of [`request::ParseTransformEach`].",
   "type": "object",
   "properties": {
     "document": {

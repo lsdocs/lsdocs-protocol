@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "SiteParseParams",
-  "description": "Parameters of [`request::SiteParse`].",
+  "title": "HostParseParams",
+  "description": "Parameters of [`request::HostParse`].",
   "type": "object",
   "properties": {
     "extension": {

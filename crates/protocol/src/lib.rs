@@ -12,9 +12,9 @@
 //!    [`Capabilities`].
 //! 2. Host -> plugin: [`notification::Initialized`].
 //! 3. Phase requests, as the plugin's capabilities allow:
-//!    [`request::Parse`], [`request::TransformCollect`], then once
-//!    [`request::TransformCollected`], [`request::TransformApply`],
-//!    [`request::Render`], then once [`request::RenderSite`].
+//!    [`request::Parse`], [`request::ParseTransformEach`], then once
+//!    [`request::ParseTransformAll`], [`request::RenderTransformEach`],
+//!    [`request::Render`], then once [`request::RenderTransformAll`].
 //! 4. Host -> plugin: [`request::Shutdown`], then [`notification::Exit`].
 //!
 //! Plugins may send [`notification::Log`], [`notification::Progress`] and
@@ -95,27 +95,27 @@ pub mod request {
         Parse = "parse", ParseParams => ParseResult;
         /// Host -> plugin. First transform pass: gathers data from one
         /// document, e.g. its headings for a site-wide index.
-        TransformCollect = "transform/collect", TransformCollectParams => TransformCollectResult;
+        ParseTransformEach = "parse/transform/each", ParseTransformEachParams => ParseTransformEachResult;
         /// Host -> plugin. Sent once between the two transform passes, to a
         /// plugin that collects: everything collected from all documents.
-        /// The `transform/apply` requests that follow omit it. The plugin
+        /// The `render/transform/each` requests that follow omit it. The plugin
         /// may answer with documents it generates from that data (an index
         /// page, say), which join the site.
-        TransformCollected = "transform/collected", TransformCollectedParams => TransformCollectedResult;
+        ParseTransformAll = "parse/transform/all", ParseTransformAllParams => ParseTransformAllResult;
         /// Host -> plugin. Second transform pass: rewrites one document, with
         /// the data collected from all documents.
-        TransformApply = "transform/apply", TransformApplyParams => TransformApplyResult;
+        RenderTransformEach = "render/transform/each", RenderTransformEachParams => RenderTransformEachResult;
         /// Host -> plugin. Renders one document to an output format.
         Render = "render", RenderParams => RenderResult;
         /// Plugin -> host. Parses a piece of text with the parser that
         /// takes files of an extension, e.g. a doc comment written in
         /// Markdown, while the plugin works on a request. The result is not
         /// normalized.
-        SiteParse = "site/parse", SiteParseParams => ParseResult;
+        HostParse = "host/parse", HostParseParams => ParseResult;
         /// Host -> plugin. Sent once after every document is rendered, if
         /// the renderer asked for it ([`RenderCapability::site`]): returns
         /// site-wide files such as a sitemap.
-        RenderSite = "render/site", RenderSiteParams => RenderSiteResult;
+        RenderTransformAll = "render/transform/all", RenderTransformAllParams => RenderTransformAllResult;
     }
 }
 
@@ -411,10 +411,10 @@ pub struct TransformCapability {
     /// document.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub nodes: Vec<String>,
-    /// Whether the plugin handles [`request::TransformCollect`]. If false,
-    /// only [`request::TransformApply`] is sent.
+    /// Whether the plugin handles [`request::ParseTransformEach`]. If false,
+    /// only [`request::RenderTransformEach`] is sent.
     #[serde(default)]
-    pub collect: bool,
+    pub each: bool,
 }
 
 /// Rendering capability.
@@ -423,9 +423,9 @@ pub struct TransformCapability {
 pub struct RenderCapability {
     /// Output formats produced, e.g. `["html"]`.
     pub formats: Vec<String>,
-    /// Whether the plugin handles [`request::RenderSite`].
+    /// Whether the plugin handles [`request::RenderTransformAll`].
     #[serde(default, skip_serializing_if = "is_false")]
-    pub site: bool,
+    pub all: bool,
 }
 
 fn is_false(value: &bool) -> bool {
@@ -451,10 +451,10 @@ pub struct ParseParams {
     pub syntax: Syntax,
 }
 
-/// Parameters of [`request::SiteParse`].
+/// Parameters of [`request::HostParse`].
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct SiteParseParams {
+pub struct HostParseParams {
     /// The extension of the files whose parser should parse the text,
     /// without the dot, e.g. `"md"` or `"rst"`.
     pub extension: String,
@@ -484,18 +484,18 @@ pub struct ParseResult {
     pub dependencies: Vec<String>,
 }
 
-/// Parameters of [`request::TransformCollect`].
+/// Parameters of [`request::ParseTransformEach`].
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct TransformCollectParams {
+pub struct ParseTransformEachParams {
     /// The document to collect from.
     pub document: Document,
 }
 
-/// Result of [`request::TransformCollect`].
+/// Result of [`request::ParseTransformEach`].
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct TransformCollectResult {
+pub struct ParseTransformEachResult {
     /// Data gathered from the document, in any shape the plugin likes.
     #[serde(default)]
     pub data: Value,
@@ -512,20 +512,20 @@ pub struct TransformCollectResult {
     pub dependencies: Vec<String>,
 }
 
-/// Parameters of [`request::TransformCollected`].
+/// Parameters of [`request::ParseTransformAll`].
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct TransformCollectedParams {
+pub struct ParseTransformAllParams {
     /// What this plugin collected from every document: a map from each
     /// document's `source` to its collected `data`.
     #[serde(default)]
     pub collected: Value,
 }
 
-/// Result of [`request::TransformCollected`].
+/// Result of [`request::ParseTransformAll`].
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct TransformCollectedResult {
+pub struct ParseTransformAllResult {
     /// Documents the plugin generates, with no source file: each one's
     /// `source` is a path no source file has (it names the output, as a
     /// source path would). The host normalizes them, and they go through
@@ -546,25 +546,25 @@ pub struct TransformCollectedResult {
     pub dependencies: Vec<String>,
 }
 
-/// Parameters of [`request::TransformApply`].
+/// Parameters of [`request::RenderTransformEach`].
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct TransformApplyParams {
+pub struct RenderTransformEachParams {
     /// The document to transform.
     pub document: Document,
     /// What this plugin collected from every document: a map from each
     /// document's `source` to its collected `data`. Null if the plugin does
     /// not collect. Over the wire the host leaves it null and sends it once
-    /// beforehand with [`request::TransformCollected`]; the plugin SDK fills
+    /// beforehand with [`request::ParseTransformAll`]; the plugin SDK fills
     /// it back in, so handlers always see it here.
     #[serde(default)]
     pub collected: Value,
 }
 
-/// Result of [`request::TransformApply`].
+/// Result of [`request::RenderTransformEach`].
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct TransformApplyResult {
+pub struct RenderTransformEachResult {
     /// The transformed document.
     pub document: Document,
     /// Problems found.
@@ -605,10 +605,10 @@ pub struct RenderResult {
     pub diagnostics: Vec<Diagnostic>,
 }
 
-/// Parameters of [`request::RenderSite`].
+/// Parameters of [`request::RenderTransformAll`].
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct RenderSiteParams {
+pub struct RenderTransformAllParams {
     /// Output format the pages were rendered to.
     pub format: String,
     /// Every page rendered, sorted by source path.
@@ -630,10 +630,10 @@ pub struct RenderedPage {
     pub metadata: Metadata,
 }
 
-/// Result of [`request::RenderSite`].
+/// Result of [`request::RenderTransformAll`].
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct RenderSiteResult {
+pub struct RenderTransformAllResult {
     /// Extra files to write.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub files: Vec<OutputFile>,
@@ -849,7 +849,7 @@ mod tests {
             }
             .into(),
         );
-        round_trip(&TransformApplyParams {
+        round_trip(&RenderTransformEachParams {
             document,
             collected: serde_json::json!({"index.md": ["Hello"]}),
         });
@@ -857,8 +857,26 @@ mod tests {
 
     #[test]
     fn method_names() {
-        assert_eq!(request::TransformCollect::METHOD, "transform/collect");
+        assert_eq!(request::ParseTransformEach::METHOD, "parse/transform/each");
+        assert_eq!(request::ParseTransformAll::METHOD, "parse/transform/all");
+        assert_eq!(
+            request::RenderTransformEach::METHOD,
+            "render/transform/each"
+        );
+        assert_eq!(request::RenderTransformAll::METHOD, "render/transform/all");
+        assert_eq!(request::HostParse::METHOD, "host/parse");
         assert_eq!(notification::Cancel::METHOD, "$/cancel");
-        assert_eq!(request::RenderSite::METHOD, "render/site");
+        let each = serde_json::to_value(TransformCapability {
+            each: true,
+            ..TransformCapability::default()
+        })
+        .unwrap();
+        assert_eq!(each["each"], true);
+        let all = serde_json::to_value(RenderCapability {
+            all: true,
+            ..RenderCapability::default()
+        })
+        .unwrap();
+        assert_eq!(all["all"], true);
     }
 }

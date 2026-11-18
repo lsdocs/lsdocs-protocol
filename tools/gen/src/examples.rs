@@ -12,12 +12,13 @@ use lsdocs_doctree::{
 };
 use lsdocs_protocol::{
     ArgumentSyntax, CancelParams, Capabilities, ContentSyntax, Diagnostic, DiagnosticsParams,
-    DirectiveSyntax, InitializeParams, InitializeResult, LogLevel, LogParams, OptionSyntax,
-    OutputFile, PROTOCOL_VERSION, ParseCapability, ParseParams, ParseResult, ProgramInfo,
-    ProgressParams, RenderCapability, RenderParams, RenderResult, RenderSiteParams,
-    RenderSiteResult, RenderedPage, RoleSyntax, Severity, SiteInfo, SiteParseParams, Syntax,
-    TransformApplyParams, TransformApplyResult, TransformCapability, TransformCollectParams,
-    TransformCollectResult, TransformCollectedParams, TransformCollectedResult,
+    DirectiveSyntax, HostParseParams, InitializeParams, InitializeResult, LogLevel, LogParams,
+    OptionSyntax, OutputFile, PROTOCOL_VERSION, ParseCapability, ParseParams, ParseResult,
+    ParseTransformAllParams, ParseTransformAllResult, ParseTransformEachParams,
+    ParseTransformEachResult, ProgramInfo, ProgressParams, RenderCapability, RenderParams,
+    RenderResult, RenderTransformAllParams, RenderTransformAllResult, RenderTransformEachParams,
+    RenderTransformEachResult, RenderedPage, RoleSyntax, Severity, SiteInfo, Syntax,
+    TransformCapability,
 };
 use serde_json::json;
 
@@ -255,18 +256,18 @@ pub struct Messages {
     pub initialize_result: InitializeResult,
     pub parse_params: ParseParams,
     pub parse_result: ParseResult,
-    pub collect_params: TransformCollectParams,
-    pub collect_result: TransformCollectResult,
-    pub site_parse_params: SiteParseParams,
+    pub collect_params: ParseTransformEachParams,
+    pub collect_result: ParseTransformEachResult,
+    pub site_parse_params: HostParseParams,
     pub site_parse_result: ParseResult,
-    pub collected_params: TransformCollectedParams,
-    pub collected_result: TransformCollectedResult,
-    pub apply_params: TransformApplyParams,
-    pub apply_result: TransformApplyResult,
+    pub collected_params: ParseTransformAllParams,
+    pub collected_result: ParseTransformAllResult,
+    pub apply_params: RenderTransformEachParams,
+    pub apply_result: RenderTransformEachResult,
     pub render_params: RenderParams,
     pub render_result: RenderResult,
-    pub render_site_params: RenderSiteParams,
-    pub render_site_result: RenderSiteResult,
+    pub render_site_params: RenderTransformAllParams,
+    pub render_site_result: RenderTransformAllResult,
     pub cancel: CancelParams,
     pub log: LogParams,
     pub progress: ProgressParams,
@@ -311,11 +312,11 @@ impl Messages {
                     }),
                     transform: Some(TransformCapability {
                         nodes: vec!["heading".into(), "custom:admonition".into()],
-                        collect: true,
+                        each: true,
                     }),
                     render: Some(RenderCapability {
                         formats: vec!["html".into()],
-                        site: true,
+                        all: true,
                     }),
                     max_concurrency: Some(1),
                     cache: Some("template:3f9a2c".into()),
@@ -332,15 +333,15 @@ impl Messages {
                 diagnostics: vec![],
                 dependencies: vec!["docs/snippets/install.sh".into()],
             },
-            collect_params: TransformCollectParams {
+            collect_params: ParseTransformEachParams {
                 document: doc.clone(),
             },
-            collect_result: TransformCollectResult {
+            collect_result: ParseTransformEachResult {
                 data: json!({"headings": [{"id": "getting-started", "level": 1}]}),
                 diagnostics: vec![],
                 dependencies: vec![],
             },
-            site_parse_params: SiteParseParams {
+            site_parse_params: HostParseParams {
                 extension: "md".into(),
                 source: "api/lsdocs.md".into(),
                 text: "Builds the *site*.".into(),
@@ -360,13 +361,13 @@ impl Messages {
                 diagnostics: vec![],
                 dependencies: vec![],
             },
-            collected_params: TransformCollectedParams {
+            collected_params: ParseTransformAllParams {
                 collected: json!({
                     "guide/getting-started.md": {"headings": [{"id": "getting-started", "level": 1}]},
                     "index.md": {"headings": []},
                 }),
             },
-            collected_result: TransformCollectedResult {
+            collected_result: ParseTransformAllResult {
                 documents: vec![{
                     let mut index = Document::new("genindex.md");
                     index.metadata.insert("nav_exclude".into(), json!(true));
@@ -383,14 +384,14 @@ impl Messages {
                 diagnostics: vec![],
                 dependencies: vec![],
             },
-            apply_params: TransformApplyParams {
+            apply_params: RenderTransformEachParams {
                 document: doc.clone(),
                 collected: json!({
                     "guide/getting-started.md": {"headings": [{"id": "getting-started", "level": 1}]},
                     "index.md": {"headings": []},
                 }),
             },
-            apply_result: TransformApplyResult {
+            apply_result: RenderTransformEachResult {
                 document: doc.clone(),
                 diagnostics: vec![warning.clone()],
                 dependencies: vec![],
@@ -406,7 +407,7 @@ impl Messages {
                 extension: "html".into(),
                 diagnostics: vec![],
             },
-            render_site_params: RenderSiteParams {
+            render_site_params: RenderTransformAllParams {
                 format: "html".into(),
                 pages: vec![RenderedPage {
                     source: "guide/getting-started.md".into(),
@@ -414,7 +415,7 @@ impl Messages {
                     metadata: BTreeMap::from([("title".into(), json!("Getting started"))]),
                 }],
             },
-            render_site_result: RenderSiteResult {
+            render_site_result: RenderTransformAllResult {
                 files: vec![OutputFile {
                     path: "sitemap.xml".into(),
                     output: b"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n".to_vec(),

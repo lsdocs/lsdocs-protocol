@@ -16,13 +16,13 @@
         "heading",
         "custom:admonition"
       ],
-      "collect": true
+      "each": true
     },
     "render": {
       "formats": [
         "html"
       ],
-      "site": true
+      "all": true
     },
     "max_concurrency": 1,
     "cache": "template:3f9a2c",

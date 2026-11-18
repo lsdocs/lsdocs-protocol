@@ -69,12 +69,12 @@ pub fn outputs() -> io::Result<Vec<Output>> {
     request::<request::Initialize>(&mut out, ex.initialize_params, ex.initialize_result);
     request::<request::Shutdown>(&mut out, (), ());
     request::<request::Parse>(&mut out, ex.parse_params, ex.parse_result);
-    request::<request::TransformCollect>(&mut out, ex.collect_params, ex.collect_result);
-    request::<request::TransformApply>(&mut out, ex.apply_params, ex.apply_result);
-    request::<request::TransformCollected>(&mut out, ex.collected_params, ex.collected_result);
+    request::<request::ParseTransformEach>(&mut out, ex.collect_params, ex.collect_result);
+    request::<request::RenderTransformEach>(&mut out, ex.apply_params, ex.apply_result);
+    request::<request::ParseTransformAll>(&mut out, ex.collected_params, ex.collected_result);
     request::<request::Render>(&mut out, ex.render_params, ex.render_result);
-    request::<request::SiteParse>(&mut out, ex.site_parse_params, ex.site_parse_result);
-    request::<request::RenderSite>(&mut out, ex.render_site_params, ex.render_site_result);
+    request::<request::HostParse>(&mut out, ex.site_parse_params, ex.site_parse_result);
+    request::<request::RenderTransformAll>(&mut out, ex.render_site_params, ex.render_site_result);
     notification::<notification::Initialized>(&mut out, ());
     notification::<notification::Exit>(&mut out, ());
     notification::<notification::Cancel>(&mut out, ex.cancel);
@@ -156,7 +156,7 @@ fn walk(dir: &Path) -> io::Result<Vec<PathBuf>> {
     Ok(files)
 }
 
-/// File stem for a method name: `transform/collect` -> `transform.collect`,
+/// File stem for a method name: `parse/transform/each` -> `transform.collect`,
 /// `$/cancel` -> `cancel`.
 fn stem(method: &str) -> String {
     method.trim_start_matches("$/").replace('/', ".")
@@ -282,7 +282,7 @@ mod tests {
 
     #[test]
     fn method_stems() {
-        assert_eq!(stem("transform/collect"), "transform.collect");
+        assert_eq!(stem("parse/transform/each"), "parse.transform.each");
         assert_eq!(stem("$/cancel"), "cancel");
         assert_eq!(stem("parse"), "parse");
     }

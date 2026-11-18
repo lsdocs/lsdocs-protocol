@@ -1,25 +1,15 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "TransformApplyResult",
-  "description": "Result of [`request::TransformApply`].",
+  "title": "RenderTransformEachParams",
+  "description": "Parameters of [`request::RenderTransformEach`].",
   "type": "object",
   "properties": {
-    "dependencies": {
-      "description": "Files the result depends on besides the request, such as included\nfiles: absolute paths, or paths relative to the site directory\n(`site.root`), with `/` separators. A cached result is only reused\nwhile they are unchanged (a file that did not exist must still not\nexist), and `lsdocs serve` rebuilds when they change. List files\nlooked for but missing too.",
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "diagnostics": {
-      "description": "Problems found.",
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/Diagnostic"
-      }
+    "collected": {
+      "description": "What this plugin collected from every document: a map from each\ndocument's `source` to its collected `data`. Null if the plugin does\nnot collect. Over the wire the host leaves it null and sends it once\nbeforehand with [`request::ParseTransformAll`]; the plugin SDK fills\nit back in, so handlers always see it here.",
+      "default": null
     },
     "document": {
-      "description": "The transformed document.",
+      "description": "The document to transform.",
       "$ref": "#/$defs/Document"
     }
   },
@@ -314,49 +304,6 @@
           ]
         }
       }
-    },
-    "Diagnostic": {
-      "description": "A problem to report to the user, modeled on LSP diagnostics.",
-      "type": "object",
-      "properties": {
-        "code": {
-          "description": "A short identifier for the kind of problem, e.g. `\"broken-link\"`.",
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "message": {
-          "description": "What is wrong.",
-          "type": "string"
-        },
-        "severity": {
-          "description": "How serious the problem is.",
-          "$ref": "#/$defs/Severity"
-        },
-        "source": {
-          "description": "Source file the problem is in, relative to the source directory.",
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "span": {
-          "description": "Where in `source` the problem is.",
-          "anyOf": [
-            {
-              "$ref": "#/$defs/Span"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        }
-      },
-      "required": [
-        "severity",
-        "message"
-      ]
     },
     "Document": {
       "description": "A parsed source document.",
@@ -1303,31 +1250,6 @@
           ]
         }
       }
-    },
-    "Severity": {
-      "description": "Severity of a [`Diagnostic`].",
-      "oneOf": [
-        {
-          "description": "The build fails.",
-          "type": "string",
-          "const": "error"
-        },
-        {
-          "description": "Probably a mistake, but the build continues.",
-          "type": "string",
-          "const": "warning"
-        },
-        {
-          "description": "Worth knowing.",
-          "type": "string",
-          "const": "info"
-        },
-        {
-          "description": "A suggestion.",
-          "type": "string",
-          "const": "hint"
-        }
-      ]
     },
     "Span": {
       "description": "A byte range within the document's source text.\n\nOffsets count UTF-8 bytes from the start of the source, and `end` is\nexclusive. The source file is the enclosing [`Document::source`].",

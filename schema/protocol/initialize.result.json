@@ -219,16 +219,16 @@
       "description": "Rendering capability.",
       "type": "object",
       "properties": {
+        "all": {
+          "description": "Whether the plugin handles [`request::RenderTransformAll`].",
+          "type": "boolean"
+        },
         "formats": {
           "description": "Output formats produced, e.g. `[\"html\"]`.",
           "type": "array",
           "items": {
             "type": "string"
           }
-        },
-        "site": {
-          "description": "Whether the plugin handles [`request::RenderSite`].",
-          "type": "boolean"
         }
       },
       "required": [
@@ -272,8 +272,8 @@
       "description": "Transform capability.",
       "type": "object",
       "properties": {
-        "collect": {
-          "description": "Whether the plugin handles [`request::TransformCollect`]. If false,\nonly [`request::TransformApply`] is sent.",
+        "each": {
+          "description": "Whether the plugin handles [`request::ParseTransformEach`]. If false,\nonly [`request::RenderTransformEach`] is sent.",
           "type": "boolean",
           "default": false
         },
