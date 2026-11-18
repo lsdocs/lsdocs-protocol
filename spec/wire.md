@@ -53,8 +53,10 @@ name = "mermaid"                     # used in logs and diagnostics
 command = ["./bin/mermaid-plugin"]   # program and arguments
 transport = "stdio"                  # or "pipe"; default "stdio"
 files = ["diagrams/**"]              # optional: source globs it handles
-options = { theme = "dark" }         # optional: passed in `initialize`
 ```
+
+Its settings are not there but in its own files under `.config/` (see
+[Configuration](#configuration)).
 
 `command` may be replaced by `runtime = "python"` with `module` (run as
 `python -m <module>`; the interpreter is `LSDOCS_PYTHON` if set) or
@@ -177,8 +179,9 @@ phase the plugin does not support is omitted:
 
 1. Host -> plugin request `initialize`, with the host's protocol version,
    the site (title, base URL, the site and source directories, every source
-   file) and the plugin's `options`. The plugin answers with its protocol
-   version, name, version and capabilities. The host ends the connection
+   file) and `config` (see [Configuration](#configuration)). The plugin
+   answers with its protocol version, name, version, capabilities and the
+   `config_files` it read its settings from. The host ends the connection
    if the versions are not compatible.
 2. Host -> plugin notification `initialized`.
 3. The build, one phase at a time:
@@ -344,10 +347,27 @@ Either side may cancel a request it sent with the notification
 and answers the request with error -32800. A response may still arrive if the
 work finished first; the canceller ignores it.
 
+## Configuration
+
+A plugin's settings are its own files, under the site's `.config/`
+directory (next to the site config file), in any format; the host does
+not read them, and lays down nothing about what is inside `.config/`.
+`initialize` gives the plugin `config`: `dir`, the absolute path of
+`.config/` (whether or not it exists), and `name`, the plugin's name in
+the site config, so two instances of a plugin can keep separate
+settings (the recommended layout is `<vendor>/<name>/`; lsdocs' own
+plugins read `lsdocs/<name>/settings.toml`). The plugin answers with
+`config_files`: the files it read, relative to `.config/` or absolute,
+including ones it looked for and did not find. The host digests them
+into the plugin's cache keys, so changing one (or creating one) is a
+change of settings, and `lsdocs serve` restarts the plugins when
+anything under `.config/` changes. A plugin that cannot read its
+settings fails `initialize`.
+
 ## Caching
 
 A plugin whose results depend only on the request, the site settings and
-its name, version and options may say so with `cache` in its capabilities:
+its name, version and settings files (`config_files`) may say so with `cache` in its capabilities:
 a string covering any other input it reads (for example a digest of a
 template file), or `""` if there is none. The host may then reuse an
 earlier result for the same inputs instead of sending the request. A plugin
@@ -371,7 +391,7 @@ A parser plugin's session, with MessagePack values written as JSON (the
 host -> [0, 0, "initialize", [{"protocol_version": "1.0-rc.0",
           "host": {"name": "lsdocs", "version": "0.1.0"},
           "site": {"root": "/home/me/site", "files": ["index.txt"]},
-          "options": null}]]
+          "config": {"dir": "/home/me/site/.config", "name": "txt"}}]]
 plugin -> [1, 0, null, {"protocol_version": "1.0-rc.0",
           "plugin": {"name": "parser-txt", "version": "1.0.0"},
           "capabilities": {"parse": {"extensions": ["txt"]}, "cache": ""}}]
