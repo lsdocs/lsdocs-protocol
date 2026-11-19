@@ -410,6 +410,7 @@ impl Messages {
                     .to_vec(),
                 extension: "html".into(),
                 diagnostics: vec![],
+                data: json!({"words": 2}),
             },
             render_all_params: RenderTransformAllParams {
                 format: "html".into(),
@@ -417,6 +418,7 @@ impl Messages {
                     source: "guide/getting-started.md".into(),
                     path: "guide/getting-started.html".into(),
                     metadata: BTreeMap::from([("title".into(), json!("Getting started"))]),
+                    data: json!({"words": 2}),
                 }],
             },
             render_all_result: RenderTransformAllResult {

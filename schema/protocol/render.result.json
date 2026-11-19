@@ -4,6 +4,9 @@
   "description": "Result of [`request::Render`].",
   "type": "object",
   "properties": {
+    "data": {
+      "description": "Data about the page, in any shape the plugin likes, handed back to\nit in [`RenderedPage::data`] at [`request::RenderTransformAll`]\n(a search index's entry for the page, say). Cached with the\nresult, so a page that is not rendered again keeps it. Omitted\nwhen null."
+    },
     "diagnostics": {
       "description": "Problems found.",
       "type": "array",

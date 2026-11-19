@@ -25,6 +25,9 @@
       "description": "A page written by the render phase.",
       "type": "object",
       "properties": {
+        "data": {
+          "description": "The `data` of the page's [`RenderResult`]. Omitted when null."
+        },
         "metadata": {
           "description": "The document's metadata after the transform phase.",
           "type": "object",

@@ -625,6 +625,13 @@ pub struct RenderResult {
     /// Problems found.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub diagnostics: Vec<Diagnostic>,
+    /// Data about the page, in any shape the plugin likes, handed back to
+    /// it in [`RenderedPage::data`] at [`request::RenderTransformAll`]
+    /// (a search index's entry for the page, say). Cached with the
+    /// result, so a page that is not rendered again keeps it. Omitted
+    /// when null.
+    #[serde(default, skip_serializing_if = "Value::is_null")]
+    pub data: Value,
 }
 
 /// Parameters of [`request::RenderTransformAll`].
@@ -650,6 +657,9 @@ pub struct RenderedPage {
     /// The document's metadata after the transform phase.
     #[serde(default, skip_serializing_if = "Metadata::is_empty")]
     pub metadata: Metadata,
+    /// The `data` of the page's [`RenderResult`]. Omitted when null.
+    #[serde(default, skip_serializing_if = "Value::is_null")]
+    pub data: Value,
 }
 
 /// Result of [`request::RenderTransformAll`].
@@ -850,7 +860,7 @@ mod tests {
         let bytes = round_trip(&RenderResult {
             output: b"<p>hi</p>".to_vec(),
             extension: "html".into(),
-            diagnostics: vec![],
+            ..RenderResult::default()
         });
         // `bin 8` header followed by the length, then the raw bytes.
         let needle = b"\xc4\x09<p>hi</p>";

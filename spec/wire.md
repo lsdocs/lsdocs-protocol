@@ -206,6 +206,11 @@ phase the plugin does not support is omitted:
       official SDKs fill it in from `parse/transform/all`).
    4. `render` for each document, then, once after every document is
       rendered, `render/transform/all` if the render capability has `all: true`. Its
+      params list every page rendered (`source`, `path`, `metadata`, and
+      the `data` its `render` result carried, if any: a value of any
+      shape, such as the page's entry in a search index, omitted when
+      null). The host keeps a page's `data` with its cached `render`
+      result, so a page that is not rendered again still has it. Its
       result lists files no single page makes, such as a sitemap.
 
    The plugin may send `log`, `progress` and `diagnostics` notifications at

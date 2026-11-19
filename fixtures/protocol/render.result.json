@@ -47,5 +47,8 @@
     62,
     10
   ],
-  "extension": "html"
+  "extension": "html",
+  "data": {
+    "words": 2
+  }
 }
