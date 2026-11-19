@@ -9,8 +9,10 @@ use scripts/org.nu
 def org-map []: nothing -> record { open scripts/org.nuon }
 
 # Runs cargo with `org-env` (local clones when LSDOCS_ORG_DIR is set).
+# PYO3_BUILD_EXTENSION_MODULE builds pyo3 crates as extension modules (no
+# libpython link), as maturin does, so plain cargo builds of them work.
 def --wrapped cargo-org [...args] {
-    with-env (org org-env) { ^cargo ...$args }
+    with-env ((org org-env) | insert PYO3_BUILD_EXTENSION_MODULE "1") { ^cargo ...$args }
 }
 
 # Format the Rust code (`--check` only checks).
