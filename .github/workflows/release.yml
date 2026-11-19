@@ -1,0 +1,20 @@
+name: Release
+
+# A `v*` tag (pushed by a maintainer) makes a release with the JSON
+# Schemas attached, which lsdocs.github.io serves.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: tar -czf schema.tar.gz schema
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" schema.tar.gz --title "$GITHUB_REF_NAME" --generate-notes

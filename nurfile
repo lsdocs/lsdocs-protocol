@@ -79,11 +79,38 @@ def "nur bump" [crate?: string] {
     if $crate == null { cargo-org update } else { cargo-org update -p $crate }
 }
 
+# Regenerates schema/ and fixtures/ from the types (a test, in
+# lsdocs-gen, fails when they are stale).
+def "nur gen" [] {
+    cargo-org run --quiet --package lsdocs-gen
+}
+
+# Decodes every fixture with nushell's msgpack reader.
+def "nur test fixtures" [] {
+    use scripts/check-fixtures.nu
+    check-fixtures
+}
+
+# The tests of the nu scripts.
+def "nur test scripts" [] {
+    use scripts/tests/check-fixtures.nu
+    check-fixtures
+}
+
+# schema/ as the archive a release attaches (target/schema.tar.gz).
+def "nur schema archive" [] {
+    mkdir target
+    tar -czf target/schema.tar.gz schema
+    print "target/schema.tar.gz"
+}
+
 # What CI runs.
 def "nur ci" [] {
     nur fmt --check
     nur lint
     nur test
+    nur test scripts
+    nur test fixtures
     nur check-dupes
     nur check-git-deps
 }
