@@ -195,7 +195,9 @@ phase the plugin does not support is omitted:
       `parse/transform/all` with everything read (a map from document
       source to the data read). Its result may hold documents the
       plugin generates from that data (an index page, say), each with a
-      `source` path no other document has: the host normalizes them and
+      `source` path no other document has: the host normalizes them,
+      sets `generated: true` in their `metadata` (replacing any value the
+      plugin gave), so renderers can tell they have no source file, and
       adds them to the site, so they go through `render/transform/each`, the later
       transformers and rendering like the others. A generated document
       whose path is taken (or not a safe relative path) is an error. Then
