@@ -221,7 +221,9 @@ impl Config {
         if file.site.theme.is_some() {
             problems.push(Problem::new(
                 "site.theme",
-                "`theme` moved: the HTML theme is chosen in render-html's settings                  (`theme = \"...\"` in `.config/lsdocs/<name>/settings.toml`, `<name>` being                  the render-html plugin's name)",
+                "`theme` moved: the HTML theme is chosen in render-html's settings \
+                 (`theme = \"...\"` in `.config/lsdocs/<name>/settings.toml`, `<name>` being \
+                 the render-html plugin's name)",
             ));
         }
 
@@ -478,18 +480,15 @@ transport = "pipe"
 
     #[test]
     fn site_theme_is_an_error() {
-        let err = Config::from_toml(
-            "[site]
-theme = \"default\"
-",
-        )
-        .unwrap_err()
-        .to_string();
-        assert!(
-            err.contains("site.theme") && err.contains("`theme` moved"),
-            "{err}"
+        let err = Config::from_toml("[site]\ntheme = \"default\"\n")
+            .unwrap_err()
+            .to_string();
+        assert_eq!(
+            err,
+            "invalid config file:\n  site.theme: `theme` moved: the HTML theme is chosen in \
+             render-html's settings (`theme = \"...\"` in `.config/lsdocs/<name>/settings.toml`, \
+             `<name>` being the render-html plugin's name)"
         );
-        assert!(err.contains("render-html"), "{err}");
     }
 
     #[test]
