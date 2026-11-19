@@ -1,0 +1,35 @@
+# lsdocs-protocol's API pages, built by `nur api` into api/site.
+
+[site]
+title = "lsdocs-protocol API"
+
+[build]
+source_dir = "content"
+
+[[plugins]]
+name = "markdown"
+builtin = "parser-markdown"
+
+[[plugins]]
+name = "rust"
+builtin = "apidoc-rust"
+
+[[plugins]]
+name = "toc"
+builtin = "transform-toc"
+
+[[plugins]]
+name = "links"
+builtin = "transform-links"
+
+[[plugins]]
+name = "nav"
+builtin = "transform-nav"
+
+[[plugins]]
+name = "highlight"
+builtin = "transform-highlight"
+
+[[plugins]]
+name = "html"
+builtin = "render-html"

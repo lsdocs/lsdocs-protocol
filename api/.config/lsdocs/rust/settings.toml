@@ -1,0 +1,3 @@
+crates = ["../crates/protocol", "../crates/config"]
+output = "rust"
+target_dir = "../target/lsdocs-rustdoc"
