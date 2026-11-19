@@ -58,8 +58,10 @@ pub struct SiteSection {
     pub title: Option<String>,
     /// URL or path prefix the site is served from, e.g. `"/docs/"`.
     pub base_url: Option<String>,
-    /// Theme name.
-    pub theme: Option<String>,
+    /// No longer supported, and an error: the theme is chosen in the
+    /// HTML renderer's settings (`theme` in render-html's
+    /// `.config/lsdocs/<name>/settings.toml`). Kept so the error can say so.
+    pub theme: Option<Value>,
 }
 
 /// The `[build]` table.
@@ -138,8 +140,6 @@ pub struct Config {
     pub title: Option<String>,
     /// URL or path prefix the site is served from.
     pub base_url: Option<String>,
-    /// Theme name.
-    pub theme: Option<String>,
     /// Directory holding source documents, relative to the config file.
     pub source_dir: String,
     /// Directory the site is written to, relative to the config file.
@@ -218,6 +218,12 @@ impl Config {
         {
             problems.push(Problem::new("site.base_url", "must not be empty"));
         }
+        if file.site.theme.is_some() {
+            problems.push(Problem::new(
+                "site.theme",
+                "`theme` moved: the HTML theme is chosen in render-html's settings                  (`theme = \"...\"` in `.config/lsdocs/<name>/settings.toml`, `<name>` being                  the render-html plugin's name)",
+            ));
+        }
 
         for (i, entry) in file.plugins.into_iter().enumerate() {
             let at = format!("plugins[{i}]");
@@ -240,7 +246,6 @@ impl Config {
         Ok(Self {
             title: file.site.title,
             base_url: file.site.base_url,
-            theme: file.site.theme,
             source_dir: file
                 .build
                 .source_dir
@@ -451,7 +456,6 @@ mod tests {
 [site]
 title = "My Docs"
 base_url = "/docs/"
-theme = "default"
 
 [build]
 source_dir = "content"
@@ -471,6 +475,22 @@ name = "html"
 command = ["render-html", "--pretty"]
 transport = "pipe"
 "#;
+
+    #[test]
+    fn site_theme_is_an_error() {
+        let err = Config::from_toml(
+            "[site]
+theme = \"default\"
+",
+        )
+        .unwrap_err()
+        .to_string();
+        assert!(
+            err.contains("site.theme") && err.contains("`theme` moved"),
+            "{err}"
+        );
+        assert!(err.contains("render-html"), "{err}");
+    }
 
     #[test]
     fn options_key_is_an_error() {

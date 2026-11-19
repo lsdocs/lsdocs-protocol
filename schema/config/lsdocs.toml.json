@@ -160,11 +160,7 @@
           ]
         },
         "theme": {
-          "description": "Theme name.",
-          "type": [
-            "string",
-            "null"
-          ]
+          "description": "No longer supported, and an error: the theme is chosen in the\nHTML renderer's settings (`theme` in render-html's\n`.config/lsdocs/<name>/settings.toml`). Kept so the error can say so."
         },
         "title": {
           "description": "Site title.",
