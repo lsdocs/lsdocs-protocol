@@ -1,11 +1,12 @@
 [package]
 name = "lsdocs-gen"
 description = "Generates the JSON Schemas in schema/ and the golden fixtures in fixtures/. Run with `nur gen`."
-version.workspace = true
+version = "0.1.0"
+publish = false
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
-publish.workspace = true
+repository.workspace = true
 
 [lints]
 workspace = true

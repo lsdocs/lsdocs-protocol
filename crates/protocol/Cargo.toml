@@ -1,11 +1,11 @@
 [package]
 name = "lsdocs-protocol"
 description = "Message and capability types for the lsdocs plugin protocol."
-version.workspace = true
+version = "0.1.0"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
-publish.workspace = true
+repository.workspace = true
 
 [lints]
 workspace = true
