@@ -14,7 +14,7 @@ permissions: {}
 
 jobs:
   release-pr:
-    uses: lsdocs/.github/.github/workflows/release-pr.yml@main
+    uses: lsdocs/.github/.github/workflows/release-pr.yml@b993cd98168f2facd8850c626f0a950cd536bf3c # main
     permissions:
       contents: read
     secrets:

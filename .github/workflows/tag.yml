@@ -16,7 +16,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: lsdocs/.github/.github/create-release@main
+      - uses: lsdocs/.github/.github/create-release@b993cd98168f2facd8850c626f0a950cd536bf3c # main
       - name: Attach the JSON Schemas
         if: startsWith(github.ref_name, 'lsdocs-protocol/v')
         env:
