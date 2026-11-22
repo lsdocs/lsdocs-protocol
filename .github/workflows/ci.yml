@@ -3,24 +3,47 @@ name: CI
 on:
   push:
     branches: [main]
+    # Files that cannot change a build.
+    paths-ignore: &no-build
+      - "*.md"
+      - "**/CHANGELOG.md"
+      - "LICENSE*"
+      - renovate.json
+      - .gitignore
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore: *no-build
 
 permissions: {}
 
+# A new push to a pull request cancels its previous run; runs on main finish.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   ci:
+    if: github.event.action != 'ready_for_review'
     uses: lsdocs/.github/.github/workflows/ci.yml@main
     permissions:
       contents: read
 
   # Each crate on its own rust-version (nur msrv installs the toolchains).
   msrv:
+    if: github.event.action != 'ready_for_review'
     uses: lsdocs/.github/.github/workflows/msrv.yml@main
     permissions:
       contents: read
 
-  deny:
-    uses: lsdocs/.github/.github/workflows/deny.yml@main
+  # The release PR, once marked ready for review: a dry run of the release.
+  # The crates, packaged and verify-built as crates.io would get them
+  # (fails until the upstream crates they need are published).
+  crates:
+    if: >-
+      github.event_name == 'pull_request'
+      && startsWith(github.head_ref, 'release-plz-')
+      && !github.event.pull_request.draft
+    uses: lsdocs/.github/.github/workflows/check-crates.yml@main
     permissions:
       contents: read
