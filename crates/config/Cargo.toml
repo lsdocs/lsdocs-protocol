@@ -1,6 +1,6 @@
 [package]
 name = "lsdocs-config"
-description = "Site configuration and plugin manifest types."
+description = "lsdocs configuration and plugin manifest types."
 version = "0.1.0"
 edition.workspace = true
 rust-version.workspace = true
