@@ -58,7 +58,7 @@
       "type": "object",
       "properties": {
         "builtin": {
-          "description": "Name of a first-party plugin to run in-process, e.g.\n`\"parser-markdown\"`.",
+          "description": "Name of a first-party plugin to run in-process, e.g.\n`\"parser-myst\"`.",
           "type": [
             "string",
             "null"
