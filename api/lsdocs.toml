@@ -8,7 +8,7 @@ source_dir = "content"
 
 [[plugins]]
 name = "markdown"
-builtin = "parser-markdown"
+builtin = "parser-myst"
 
 [[plugins]]
 name = "rust"

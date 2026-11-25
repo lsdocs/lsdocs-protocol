@@ -84,7 +84,7 @@ pub struct PluginEntry {
     /// Unique name used in logs and diagnostics.
     pub name: String,
     /// Name of a first-party plugin to run in-process, e.g.
-    /// `"parser-markdown"`.
+    /// `"parser-myst"`.
     pub builtin: Option<String>,
     /// Program and arguments to launch.
     pub command: Option<Vec<String>>,
@@ -464,7 +464,7 @@ source_dir = "content"
 
 [[plugins]]
 name = "markdown"
-builtin = "parser-markdown"
+builtin = "parser-myst"
 
 [[plugins]]
 name = "toc"
@@ -511,7 +511,7 @@ transport = "pipe"
         assert_eq!(
             config.plugins[0].launch,
             Launch::Builtin {
-                name: "parser-markdown".into()
+                name: "parser-myst".into()
             }
         );
         assert_eq!(
