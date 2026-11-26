@@ -238,7 +238,10 @@ pub struct InitializeResult {
     /// The files the plugin read its settings from, relative to
     /// `.config/` (or absolute), including ones it looked for and did not
     /// find. The host digests them into the plugin's cache keys, so a
-    /// change to one (or creating one) is a change of settings.
+    /// change to one (or creating one) is a change of settings, and
+    /// `lsdocs serve` restarts the plugins when one changes. Other files
+    /// the settings name and the plugin reads at startup (a theme
+    /// directory's), and directories, may be listed too.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub config_files: Vec<String>,
 }
