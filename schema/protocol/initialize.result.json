@@ -9,7 +9,7 @@
       "$ref": "#/$defs/Capabilities"
     },
     "config_files": {
-      "description": "The files the plugin read its settings from, relative to\n`.config/` (or absolute), including ones it looked for and did not\nfind. The host digests them into the plugin's cache keys, so a\nchange to one (or creating one) is a change of settings.",
+      "description": "The files the plugin read its settings from, relative to\n`.config/` (or absolute), including ones it looked for and did not\nfind. The host digests them into the plugin's cache keys, so a\nchange to one (or creating one) is a change of settings, and\n`lsdocs serve` restarts the plugins when one changes. Other files\nthe settings name and the plugin reads at startup (a theme\ndirectory's), and directories, may be listed too.",
       "type": "array",
       "items": {
         "type": "string"

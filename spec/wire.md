@@ -373,7 +373,10 @@ plugins read `lsdocs/<name>/settings.toml`). The plugin answers with
 including ones it looked for and did not find. The host digests them
 into the plugin's cache keys, so changing one (or creating one) is a
 change of settings, and `lsdocs serve` restarts the plugins when
-anything under `.config/` changes. A plugin that cannot read its
+anything under `.config/`, or one of these files, changes. A plugin
+whose settings name other files it reads at startup (a theme
+directory, say) may list those too, and directories, whose entries
+being added or removed `lsdocs serve` also notices. A plugin that cannot read its
 settings fails `initialize`.
 
 ## Caching
