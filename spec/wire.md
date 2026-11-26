@@ -315,7 +315,11 @@ A directive nobody declared stays a `custom` node of its name with
 Renderers draw a `custom` node they don't know as a container of its
 children; a `custom` node with the attribute `inline: true` is inline
 (`render-html` uses a `span`, or the element named by `html_tag`, with
-`title` as its title).
+`title` as its title). A block one may name its element with `html_tag`
+too (`render-html` uses a `div` otherwise); a `pre` keeps its content's
+spaces and newlines, and with an inline child naming `code` it is drawn
+as code blocks are (preformatted text with markup in it, such as a
+grammar).
 
 ## Diagnostics
 
