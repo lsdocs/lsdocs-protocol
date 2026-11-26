@@ -252,7 +252,8 @@ transformer or renderer works with any parser:
 - The host also sets `target` on links without one whose `url` is a
   relative path to a parsed document (`target.document`, plus
   `target.anchor` from any `#fragment`) or a bare `#fragment`
-  (`target.anchor` only).
+  (`target.anchor` only). It does so again after each transformer's apply
+  pass, so links a transformer adds without a `target` get one too.
 - Common constructs have core kinds: `admonition`, `definition_list`
   (`definition_term` and `definition_description` children),
   `footnote_reference` / `footnote_definition`, `math`, `figure` (with an
