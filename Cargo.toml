@@ -17,8 +17,8 @@ repository = "https://github.com/lsdocs/lsdocs-protocol"
 # Internal crates. A version is given alongside the path so these are not
 # wildcard dependencies once publishing is enabled.
 lsdocs-doctree = { git = "https://github.com/lsdocs/lsdocs-doctree", branch = "main", version = "0.1.0" }
-lsdocs-config = { path = "crates/config", version = "0.1.0" }
-lsdocs-protocol = { path = "crates/protocol", version = "0.1.0" }
+lsdocs-config = { path = "crates/config", version = "0.1.1" }
+lsdocs-protocol = { path = "crates/protocol", version = "0.1.1" }
 
 rmp-serde = "1.3.1"
 schemars = "1.2.3"
