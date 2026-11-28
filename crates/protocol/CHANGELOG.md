@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1](https://github.com/lsdocs/lsdocs-protocol/compare/lsdocs-protocol/v0.1.0...lsdocs-protocol/v0.1.1) - 2026-11-28
+
+### Other
+
+- *(spec)* serve restarts plugins when their config_files change ([#21](https://github.com/lsdocs/lsdocs-protocol/pull/21))
+
 ## [0.1.0](https://github.com/lsdocs/lsdocs-protocol/releases/tag/lsdocs-protocol/v0.1.0) - 2026-11-22
 
 ### Added
